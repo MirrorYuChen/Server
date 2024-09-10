@@ -20,7 +20,6 @@ public:
   explicit Thread(ThreadFunc func, const std::string &name=std::string());
   ~Thread();
 
-
   void Start(); // 启动线程
   void Join();  // 等待线程
 

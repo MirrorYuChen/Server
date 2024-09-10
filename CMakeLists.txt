@@ -42,6 +42,7 @@ target_link_libraries(${PROJECT_NAME} ${OBJECTS_TO_LINK})
 
 set(TEST_LIST
   TestLogger
+  TestSocket
 )
 
 foreach(TEST ${TEST_LIST})
