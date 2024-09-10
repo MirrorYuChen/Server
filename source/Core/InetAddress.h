@@ -11,7 +11,7 @@
 #include <string>
 
 NAMESPACE_BEGIN
-class InetAddress {
+class API InetAddress {
 public:
   explicit InetAddress(const std::string &ip = "127.0.0.1", uint16_t port = 16);
   explicit InetAddress(const sockaddr_in &addr);

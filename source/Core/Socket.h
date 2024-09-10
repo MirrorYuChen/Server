@@ -10,7 +10,7 @@
 
 NAMESPACE_BEGIN
 class InetAddress;
-class Socket {
+class API Socket {
 public:
   explicit Socket(int sockfd);
   ~Socket();
@@ -33,7 +33,7 @@ public:
 
   // 设置端口复用
   void setReusePort(bool on);
-  
+
   // 设置长连接
   void setKeepAlive(bool on);
 
