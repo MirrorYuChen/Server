@@ -9,7 +9,7 @@
 日期 | 更新内容
 --|--
 20240910 | 1.创建项目，添加Logger模块封装；2.添加Socket和InetAddress封装；
-20240911 | 1.添加poller，Channel，EventLoop封装；2.添加EventLoopThread和EventLoopThreadPool相关封装和实现；3.添加TcpConnection和Acceptor相关代码实现；
+20240911 | 1.添加poller，Channel，EventLoop封装；2.添加EventLoopThread和EventLoopThreadPool相关封装和实现；3.添加TcpConnection和Acceptor相关代码实现；4.添加TcpServer及EchoServer测试用例；
 
 
 ## 3.参考资料

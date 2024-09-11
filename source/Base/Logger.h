@@ -47,7 +47,7 @@ private:
 private:
   std::string log_file_;
   std::string tag_ = "chenjingyu";
-  int level_ = 1;
+  int level_ = 2;
   std::once_flag flag_;
 };
 
