@@ -15,6 +15,7 @@
 NAMESPACE_BEGIN
 class EventLoop;
 class Channel;
+/// @brief 事件分发器，相当于Demultiplex
 class API Poller {
 public:
   using ChannelList = std::vector<Channel*>;

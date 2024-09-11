@@ -16,8 +16,7 @@
 NAMESPACE_BEGIN
 class EventLoop;
 class InetAddress;
-/// @brief Acceptor运行在mainLoop中，TcpServer发现
-/// Acceptor中有一个新连接，则将Channel分发给一个subLoop
+/// @brief 主要封装listenfd相关操作
 class API Acceptor {
 public:
   using NewConnectionCallback = std::function<void(int sockfd, const InetAddress&)>;

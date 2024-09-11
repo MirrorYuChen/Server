@@ -20,6 +20,7 @@ NAMESPACE_BEGIN
 class Channel;
 class EventLoop;
 class Socket;
+/// @brief 封装了Socket、Channel及各种回调
 class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
 public:
   TcpConnection(EventLoop *loop, 

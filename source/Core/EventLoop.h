@@ -20,7 +20,7 @@
 NAMESPACE_BEGIN
 class Channel;
 class Poller;
-/// @brief 事件循环：包含Channel和Poller
+/// @brief 事件循环：包含Channel和Poller，相当于Reactor
 class API EventLoop {
 public:
   using Functor = std::function<void()>;

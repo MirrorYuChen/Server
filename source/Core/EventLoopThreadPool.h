@@ -15,6 +15,7 @@
 NAMESPACE_BEGIN
 class EventLoop;
 class EventLoopThread;
+/// @brief one loop per thread
 class API EventLoopThreadPool {
 public:
   using ThreadInitCallback = std::function<void(EventLoop*)>;
