@@ -15,6 +15,7 @@
 
 #include "Base/Timestamp.h"
 #include "Base/CurrentThread.h"
+#include "Base/Logger.h"
 
 NAMESPACE_BEGIN
 class Channel;
@@ -99,5 +100,10 @@ private:
   /// @brief 存储Loop跨线程要执行的回调函数
   std::vector<Functor> pending_functors_;
 };
+
+static EventLoop *CheckLoopNotNull(EventLoop *loop) {
+  CHECK(loop) << "mainLoop is nullptr!";
+  return loop;
+}
 
 NAMESPACE_END

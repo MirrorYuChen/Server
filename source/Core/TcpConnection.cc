@@ -18,11 +18,6 @@
 #include "Core/EventLoop.h"
 
 NAMESPACE_BEGIN
-static EventLoop *CheckLoopNotNull(EventLoop *loop) {
-  CHECK(loop) << "mainLoop is nullptr!";
-  return loop;
-}
-
 TcpConnection::TcpConnection(
   EventLoop *loop, const std::string &name, 
   int sockfd, const InetAddress &local_addr, 
