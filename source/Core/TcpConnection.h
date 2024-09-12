@@ -20,7 +20,10 @@ NAMESPACE_BEGIN
 class Channel;
 class EventLoop;
 class Socket;
-/// @brief 封装了Socket、Channel及各种回调
+/**
+ * @brief 用于subLoop中，对连接的sockfd及其相关方法进行封装
+ * (读时间、发送事件、消息事件、连接关闭事件及错误事件等)
+ */
 class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
 public:
   TcpConnection(EventLoop *loop, 
@@ -89,9 +92,17 @@ private:
     state_ = state;
   }
 
+  /// @brief 读事件处理函数
+  /// @param recv_time 获取监听事件的时间戳
   void HandleRead(Timestamp recv_time);
+
+  /// @brief 写事件处理函数
   void HandleWrite();
+
+  /// @brief 连接关闭处理函数
   void HandleClose();
+
+  /// @brief 错误处理函数
   void HandleError();
 
   void SendInLoop(const void *msg, size_t len);
@@ -100,13 +111,15 @@ private:
   NOT_ALLOWED_COPY(TcpConnection)
 
 private:
+  /// @brief 轮询算法选取的subLoop
   EventLoop *loop_;
   const std::string name_;
   std::atomic_int state_;    // 连接状态
   bool reading_;
 
-
+  /// @brief 保存已连接sockfd
   std::unique_ptr<Socket> socket_;
+  /// @brief 封装上面socket_及各类事件处理函数
   std::unique_ptr<Channel> channel_;
 
   const InetAddress local_addr_;    // 服务器地址
@@ -119,7 +132,9 @@ private:
   HighWaterMarkCallback high_water_cb_;
   size_t high_water_mark_;
 
+  /// @brief 对应Tcp连接用户接收缓冲区
   Buffer input_;
+  /// @brief 对应Tcp连接发送缓冲区
   Buffer output_;
 };
 

@@ -15,7 +15,16 @@
 NAMESPACE_BEGIN
 class EventLoop;
 class Channel;
-/// @brief 事件分发器，相当于Demultiplex
+/**
+ * @brief 封装了和事件监听相关的方法和成员，负责监听注册的文件描述符上
+ * 是否有触发事件，并返回发生事件的文件描述符及具体发生事件，所以一个
+ * Poller对象对应一个事件监听器。Poller封装了如下内容：
+ * (1) 用epoll_create1方法创建的epoll文件句柄；
+ * (2) 保留所有注册在该poller上文件描述符到channel的映射channels_;
+ * (3) 所归属EventLoop对象owner_loop_;
+ * (4) epoll_wait获取到poller上监听到发生的事件active_channels；
+ * (5) 通过epoll_ctl向poller注册/修改channel照看文件描述符对应感兴趣事件
+ */
 class API Poller {
 public:
   using ChannelList = std::vector<Channel*>;

@@ -25,7 +25,7 @@ int CreateEvenfd() {
   return evfd;
 }
 
-/// @brief EventLoop构造函数
+/// @brief EventLoop构造函数，每个EventLoop对象都唯一绑定了一个线程
 EventLoop::EventLoop() :
   looping_(false),
   quit_(false),
@@ -35,6 +35,7 @@ EventLoop::EventLoop() :
   wakeup_fd_(CreateEvenfd()),
   wakeup_channel_(new Channel(this, wakeup_fd_)),
   curr_active_channel_(nullptr) {
+  // 该线程已绑定某个EventLoop对象了，那么该线程就无法创建新EventLoop对象
   if (t_loop_in_this_thread) {
     LogCritical("Another EventLoop exists.");
   } else {

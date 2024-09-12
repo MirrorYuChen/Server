@@ -21,9 +21,14 @@ NAMESPACE_BEGIN
 class Channel;
 class Poller;
 /**
- * @brief 事件循环：包含Channel和Poller，相当于Reactor
- * EventLoop相当于Channel和Poller之间桥梁，Channel和Poller
- * 之间不直接沟通而是通过EventLoop这个类。
+ * @brief 作为一个网络服务器，需要持续监听事件发生、持续获取监听结果和
+ * 持续处理监听结果对应事件的能力，也就是需要去循环的调用Poller的Poll方法获取
+ * 实际发生事件的channel集合，然后调用Channel中保存的事件处理函数处理相应事件。
+ * EventLoop就是负责“循环”，及驱动“循环”的重要模块，Channel和Poller相当于
+ * EventLoop的手下，EventLoop整合封装了二者并向上提供了更方便的接口使用。
+ * Poller负责监听事件发生的结果，Channel则在其中起到将sockfd及相关属性封装的作用，
+ * 将sockfd、其感兴趣事件、实际发生事件及不同事件对应回调函数封装在一起，这样各模块
+ * 中传递更加方便。
  */
 class API EventLoop {
 public:
