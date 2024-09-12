@@ -99,7 +99,7 @@ void TcpServer::RemoveConnection(const TcpConnectionPtr &conn_ptr) {
 }
 
 void TcpServer::RemoveConnectionInLoop(const TcpConnectionPtr &conn_ptr) {
-  LogInfo("TcpServer::RemoveConnectionInLoop() [{}] - connection [{}]", name_), conn_ptr->name();
+  LogInfo("TcpServer::RemoveConnectionInLoop() [{}] - connection [{}]", name_, conn_ptr->name());
   conns_.erase(conn_ptr->name());
   EventLoop *io_loop = conn_ptr->getLoop();
   io_loop->QueueInLoop(
