@@ -13,6 +13,7 @@
 NAMESPACE_BEGIN
 class EventLoop;
 class Timestamp;
+/// @brief 对文件描述符和感兴趣事件的封装
 class API Channel {
 public:
   using EventCallback = std::function<void()>;
@@ -100,24 +101,37 @@ public:
     return events_ & kReadEvent;
   }
 
-  // Poller
+  /**
+   * @brief 获取channel与poller相关状态
+   * @return channel与poller相关状态：
+   * kNew：还未被poller监听
+   * kAdded：已被poller监听
+   * kDeleted：已被移除
+   */
   int index() const {
     return index_;
   }
 
+  /// @brief 设置channel与poller相关状态
+  /// @param index kNew(-1)，kAdded(1), kDeleted(2)
   void setIndex(int index) {
     index_ = index;
   }
 
-  // one loop per thread
+  /// @brief 获取当前channel所属loop，one thread per loop
+  /// @return 当前channel所属loop
   EventLoop *ownerLoop() const {
     return loop_;
   }
 
+  /// @brief 从poller对象移除对当前channel监听
   void Remove();
 
 private:
+  /// @brief 调用epoll_ctl更新poller对象上相应感兴趣事件 
   void Update();
+  /// @brief 根据事件执行channel中保存的回调函数
+  /// @param recv_time poll所有IO就绪事件的时间戳
   void HandleEventWithGuard(Timestamp recv_time);
 
 private:
@@ -130,13 +144,13 @@ private:
   static const int kReadEvent;
   static const int kWriteEvent;
 
-  // 当前Channel所属EventLoop
+  /// @brief 当前Channel所属EventLoop
   EventLoop *loop_;
-  // 当前Channel管理在poller上监听对象
+  /// @brief 当前Channel管理在poller上监听对象
   const int sockfd_;
-  // 注册sockfd感兴趣事件
+  /// @brief 注册sockfd感兴趣事件
   int events_;
-  // 当前具体发生事件
+  /// @brief 当前具体发生事件
   int revents_;
   /**
    * Poller上注册情况
@@ -152,7 +166,7 @@ private:
   // 标志此Channel是否被调用过Channel::Tie方法
   bool tied_;
 
-  // 事件处理回调函数
+  /// @brief 事件处理回调函数
   ReadEventCallback read_cb_;
   EventCallback write_cb_;
   EventCallback close_cb_;

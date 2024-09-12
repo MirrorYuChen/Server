@@ -23,9 +23,24 @@ public:
   Poller(EventLoop *loop);
   virtual ~Poller() = default;
 
-  /// 派生类实现的接口 
+  /**
+   * @brief 对应于epoll_wait
+   * @param timeout_ms 超时时间
+   * @param active_channels poller对象上发生事件
+   * @return Timestamp 获取到poller对象上发生事件的时间戳
+   */
   virtual Timestamp Poll(int timeout_ms, ChannelList *active_channels) = 0;
+  
+  /**
+   * @brief 更新poller与channel之间关系
+   * @param channel 当前要进行更新的channel
+   */
   virtual void UpdateChannel(Channel *channel) = 0;
+
+  /**
+   * @brief 从poller中移除对于当前channel的绑定
+   * @param channel 待移除的channel
+   */
   virtual void RemoveChannel(Channel *channel) = 0;
 
   /// @brief 判断当前channel是否注册到poller中

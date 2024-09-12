@@ -10,31 +10,45 @@
 
 NAMESPACE_BEGIN
 class InetAddress;
+/// @brief 基本socket封装类
 class API Socket {
 public:
+  /// @brief 构造函数
+  /// @param sockfd 创建socket的文件描述符
   explicit Socket(int sockfd);
   ~Socket();
 
+  /// @brief 获取当前socket的文件描述符
+  /// @return 当前socket的文件描述符
   const int sockfd() const {
     return sockfd_;
   }
 
+  /// @brief 绑定待监听本地地址端口
+  /// @param local_addr 待监听本地地址端口
   void BindAddress(const InetAddress &local_addr);
+
+  /// @brief 启动监听
   void Listen();
+
+  /// @brief 根据监听到客户端信息创建一个socket
+  /// @param peer_addr 监听到客户端地址端口信息
+  /// @return 创建的客户端socket文件描述符
   int Accept(InetAddress *peer_addr);
 
+  /// @brief 关闭socket写功能
   void ShutdownWrite();
 
-  // 设置为非阻塞
+  /// @brief 设置socket为非阻塞
   void setNonBlocking();
 
-  // 设置地址复用
+  /// @brief 设置socket为地址复用
   void setReuseAddr(bool on);
 
-  // 设置端口复用
+  /// @brief 设置socket为端口复用
   void setReusePort(bool on);
 
-  // 设置长连接
+  /// @brief 设置socket为长连接
   void setKeepAlive(bool on);
 
 private:

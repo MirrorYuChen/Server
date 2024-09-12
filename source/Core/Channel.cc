@@ -29,22 +29,30 @@ Channel::Channel(EventLoop *loop, int sockfd) :
 
 Channel::~Channel() = default;
 
+/// @brief TcpConnection建立时调用
+/// @param obj 建立到TcpConnectionPtr的绑定
 void Channel::Tie(const std::shared_ptr<void> &obj) {
+  // 1.weak_ptr指向TcpConnectionPtr
   tie_ = obj;
+  // 2.设置绑定标志
   tied_ = true;
 }
 
+/// @brief 更新poller对象上channel关注事件
 void Channel::Update() {
   loop_->UpdateChannel(this);
 }
 
+/// @brief 从poller对象上移除当前channel
 void Channel::Remove() {
   loop_->RemoveChannel(this);
 }
 
+/// @brief 从poller对象上获取事件后，进行处理
+/// @param recv_time 获取事件的时间戳
 void Channel::HandleEvent(Timestamp recv_time) {
   if (tied_) {
-    // 变成shared_ptr增加引用计数，防止误删
+    // 判断TcpConnectionPtr是否还存在，存在才需要处理，不存在就不处理
     std::shared_ptr<void> guard = tie_.lock();
     if (guard) {
       HandleEventWithGuard(recv_time);
@@ -54,6 +62,8 @@ void Channel::HandleEvent(Timestamp recv_time) {
   }
 }
 
+/// @brief 具体事件处理方法
+/// @param recv_time 获取事件的时间戳
 void Channel::HandleEventWithGuard(Timestamp recv_time) {
   // 1.对端关闭事件
   if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN)) {
@@ -85,6 +95,5 @@ void Channel::HandleEventWithGuard(Timestamp recv_time) {
     }
   }
 }
-
 
 NAMESPACE_END

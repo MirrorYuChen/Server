@@ -20,7 +20,11 @@
 NAMESPACE_BEGIN
 class Channel;
 class Poller;
-/// @brief 事件循环：包含Channel和Poller，相当于Reactor
+/**
+ * @brief 事件循环：包含Channel和Poller，相当于Reactor
+ * EventLoop相当于Channel和Poller之间桥梁，Channel和Poller
+ * 之间不直接沟通而是通过EventLoop这个类。
+ */
 class API EventLoop {
 public:
   using Functor = std::function<void()>;
@@ -29,6 +33,7 @@ public:
   EventLoop();
   ~EventLoop();
 
+  /// @brief 循环调用epoll_wait，不断获取发生事件的文件描述符
   void Loop();
   void Quit();
 
@@ -80,7 +85,7 @@ private:
   /// @brief Poller返回发生事件Channels的返回时间
   Timestamp poll_return_time_;
 
-  /// @brief 当前绑定的poller
+  /// @brief 绑定的poller
   std::unique_ptr<Poller> poller_;
 
   /// @brief mainLoop获取一个新用户Channel，需要轮询选择一个subLoop
@@ -88,7 +93,7 @@ private:
   int wakeup_fd_;
   std::unique_ptr<Channel> wakeup_channel_;
 
-  /// @brief Poll后IO就绪的Channel
+  /// @brief epoll_wait后获取到的事件
   ChannelList active_channels_;
 
   /// @brief 当前正在处理的Channel
