@@ -145,6 +145,8 @@ public:
 
 private:
   /// @brief 调用epoll_ctl更新poller对象上相应感兴趣事件 
+  /// EventLoop::UpdateChannel() => EpollPoller::UpdateChannel() 
+  /// => epoll_ctl实现对sockfd_的增/删/改感兴趣事件
   void Update();
   /// @brief 根据事件执行channel中保存的回调函数
   /// @param recv_time poll所有IO就绪事件的时间戳

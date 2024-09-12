@@ -21,7 +21,7 @@ NAMESPACE_BEGIN
 class Channel;
 class Poller;
 /**
- * @brief 作为一个网络服务器，需要持续监听事件发生、持续获取监听结果和
+ * @brief 相当于Reactor，作为一个网络服务器，需要持续监听事件发生、持续获取监听结果和
  * 持续处理监听结果对应事件的能力，也就是需要去循环的调用Poller的Poll方法获取
  * 实际发生事件的channel集合，然后调用Channel中保存的事件处理函数处理相应事件。
  * EventLoop就是负责“循环”，及驱动“循环”的重要模块，Channel和Poller相当于
@@ -69,7 +69,9 @@ public:
   }
 
 private:
+  /// @brief wakeup_fd_绑定读操作回调函数
   void HandleRead();
+  /// @brief 执行上层回调
   void DoPendingFunctors();
 
 private:

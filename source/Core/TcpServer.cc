@@ -21,6 +21,7 @@ TcpServer::TcpServer(
   thread_init_cb_(),
   started_(0),
   next_conn_id_(1) {
+  // 向acceptor_对象注册一个回调函数TcpServer::NewConnection
   acceptor_->setNewConnectionCallback(
     std::bind(&TcpServer::NewConnection, this, std::placeholders::_1, std::placeholders::_2)
   );

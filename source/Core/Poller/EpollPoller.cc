@@ -33,6 +33,10 @@ EpollPoller::~EpollPoller() {
   close(epfd_);
 }
 
+/// @brief 获取监听到发生事件，并打包给active_channels
+/// @param timeout_ms 监听超时事件
+/// @param active_channels 活跃的channel 
+/// @return 获取监听到发生事件的时间戳
 Timestamp EpollPoller::Poll(int timeout_ms, ChannelList *active_channels) {
   size_t num_evts = epoll_wait(epfd_, evts_.data(), static_cast<int>(evts_.size()), timeout_ms);
   int save_errno = errno;
@@ -46,7 +50,7 @@ Timestamp EpollPoller::Poll(int timeout_ms, ChannelList *active_channels) {
   } else if (num_evts == 0) {
     LogDebug("timeout!");
   } else {
-    // 不是终端错误
+    // 不是中断错误
     if (save_errno != EINTR) {
       errno = save_errno;
       LogError("EpollPoller::Poll() failed.");
@@ -55,6 +59,8 @@ Timestamp EpollPoller::Poll(int timeout_ms, ChannelList *active_channels) {
   return now;
 }
 
+/// @brief 更新对channel操作(增/删/改)
+/// @param channel 待操作channel
 void EpollPoller::UpdateChannel(Channel *channel) {
   // 1.获取poller与channel之间相关状态
   const int index = channel->index();
@@ -67,12 +73,12 @@ void EpollPoller::UpdateChannel(Channel *channel) {
     channel->setIndex(kAdded);
     Update(EPOLL_CTL_ADD, channel);
   } else {
-    // 2.删除channel监听事件
+    // 3.删除channel监听事件
     if (channel->isNoneEvent()) {
       Update(EPOLL_CTL_DEL, channel);
       channel->setIndex(kDeleted);
     } else {
-      // 3.修改channel监听事件
+      // 4.修改channel监听事件
       Update(EPOLL_CTL_MOD, channel);
     }
   }
@@ -92,11 +98,11 @@ void EpollPoller::FillActiveChannels(int num_evts, ChannelList *active_channels)
 /// @brief 从poller中移除对channel的绑定
 /// @param channel 待处理channel 
 void EpollPoller::RemoveChannel(Channel *channel) {
-  // 1.从列表中删除当前channel
+  // 1.用户态操作：从列表中删除当前channel
   int sockfd = channel->sockfd();
   channels_.erase(sockfd);
 
-  // 2.更新poller上当前channel的关注事件
+  // 2.内核态操作：更新poller上当前channel的关注事件
   int idx = channel->index();
   if (idx == kAdded) {
     Update(EPOLL_CTL_DEL, channel);
@@ -118,6 +124,7 @@ void EpollPoller::Update(int op, Channel *channel) {
   ev.data.fd = sockfd;
   ev.data.ptr = channel;
 
+  // 内核态操作
   if (epoll_ctl(epfd_, op, sockfd, &ev) < 0) {
     if (op == EPOLL_CTL_DEL) {
       LogError("epoll_ctl() del error: {}.", errno);
