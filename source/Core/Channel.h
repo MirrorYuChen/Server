@@ -7,12 +7,12 @@
 #pragma once
 
 #include "Api.h"
+#include "Base/Timestamp.h"
 #include <functional>
 #include <memory>
 
 NAMESPACE_BEGIN
 class EventLoop;
-class Timestamp;
 /**
  * @brief Tcp网络编程中，若poller监听某个文件描述符，就要将这个sockfd和它
  * 感兴趣事件需要通过epoll_ctl注册到poller上。当poller监听到该sockfd上发生
