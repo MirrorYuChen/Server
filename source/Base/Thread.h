@@ -13,6 +13,10 @@
 #include <string>
 #include <atomic>
 
+namespace std {
+  typedef atomic<std::int32_t> atomic_int32_t;
+}
+
 NAMESPACE_BEGIN
 class API Thread {
 public:
