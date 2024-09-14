@@ -54,16 +54,29 @@ TcpConnection::~TcpConnection() {
 void TcpConnection::Send(const std::string &buf) {
   if (state_ == kConnected) {
     if (loop_->isInLoopThread()) {
-      SendInLoop(buf.c_str(), buf.size());
+      SendInLoop(buf);
     } else {
       loop_->RunInLoop(
-        std::bind(&TcpConnection::SendInLoop, this, buf.c_str(), buf.size())
+        std::bind(&TcpConnection::SendInLoop, this, buf)
       );
     }
   }
 }
 
-void TcpConnection::SendInLoop(const void *msg, size_t len) {
+void TcpConnection::Send(Buffer *buf) {
+  if (state_ == kConnected) {
+    std::string str = buf->RetrieveAllAsString();
+    if (loop_->isInLoopThread()) {
+      SendInLoop(str);
+    } else {
+      loop_->RunInLoop(
+        std::bind(&TcpConnection::SendInLoop, this, str)
+      );
+    }
+  }
+}
+
+void TcpConnection::SendInLoopImpl(const void *msg, size_t len) {
   ssize_t nwrote = 0;
   size_t remaining = len;
   bool fault_error = false;
@@ -114,6 +127,10 @@ void TcpConnection::SendInLoop(const void *msg, size_t len) {
     // 注册channel的写事件
     channel_->EnableWriting();
   }
+}
+
+void TcpConnection::SendInLoop(const std::string &str) {
+  SendInLoopImpl(str.c_str(), str.size());
 }
 
 void TcpConnection::Shutdown() {

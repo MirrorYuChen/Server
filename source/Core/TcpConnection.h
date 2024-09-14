@@ -54,6 +54,7 @@ public:
   }
 
   void Send(const std::string &buf);
+  void Send(Buffer *buf);
   
   void Shutdown();
 
@@ -105,7 +106,8 @@ private:
   /// @brief 错误处理函数
   void HandleError();
 
-  void SendInLoop(const void *msg, size_t len);
+  void SendInLoop(const std::string &str);
+  void SendInLoopImpl(const void *msg, size_t len);
   void ShutdownInLoop();
 
   NOT_ALLOWED_COPY(TcpConnection)
