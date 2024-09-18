@@ -11,7 +11,7 @@
 
 NAMESPACE_BEGIN
 class Buffer;
-class HttpContext {
+class API HttpContext {
 public:
   enum HttpRequestParseState {
     kExpectRequestLine,

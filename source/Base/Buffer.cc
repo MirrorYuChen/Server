@@ -75,12 +75,13 @@ void Buffer::Append(const std::string &str) {
 
 void Buffer::Append(const char *data, size_t len) {
   EnsureWriteableBytes(len);
-  std::copy(data, data + len, begin() + writer_idx_);
+  std::copy(data, data + len, beginWrite());
+  writer_idx_ += len;
 }
 
 const char *Buffer::FindCRLF() const {
-  const char *crlf = std::search(peek(), begin() + writer_idx_, kCRLF, kCRLF + 2);
-  return crlf == begin() + writer_idx_ ? NULL : crlf;
+  const char *crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF + 2);
+  return crlf == beginWrite() ? NULL : crlf;
 }
 
 char *Buffer::begin() {
@@ -89,6 +90,14 @@ char *Buffer::begin() {
 
 const char *Buffer::begin() const {
   return buffer_.data();
+}
+
+char *Buffer::beginWrite() {
+  return begin() + writer_idx_;
+}
+
+const char *Buffer::beginWrite() const {
+  return begin() + writer_idx_;
 }
 
 void Buffer::MakeSpace(int len) {
@@ -100,7 +109,7 @@ void Buffer::MakeSpace(int len) {
     size_t readable = ReadableBytes();
     std::copy(
       begin() + reader_idx_, 
-      begin() + writer_idx_, 
+      beginWrite(), 
       begin() + kCheapPrepend
     );
     reader_idx_ = kCheapPrepend;
@@ -115,7 +124,7 @@ ssize_t Buffer::ReadFd(int fd, int *save_errno) {
   const size_t writeable = WriteableBytes();
 
   // 2.第一缓冲区指向可写空间
-  vec[0].iov_base = begin() + writer_idx_;
+  vec[0].iov_base = beginWrite();
   vec[0].iov_len = writeable;
 
   // 3.第二缓冲区指向栈空间

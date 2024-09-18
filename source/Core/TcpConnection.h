@@ -54,7 +54,6 @@ public:
   }
 
   void Send(const std::string &buf);
-  void Send(Buffer *buf);
   
   void Shutdown();
 

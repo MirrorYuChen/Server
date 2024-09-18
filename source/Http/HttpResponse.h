@@ -12,7 +12,7 @@
 
 NAMESPACE_BEGIN
 class Buffer;
-class HttpResponse {
+class API HttpResponse {
 public:
   enum HttpStatusCode {
     kUnknown,

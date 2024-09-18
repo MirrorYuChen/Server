@@ -6,6 +6,7 @@
  */
 #include "Http/HttpResponse.h"
 #include "Base/Buffer.h"
+#include "Base/Logger.h"
 
 NAMESPACE_BEGIN
 HttpResponse::HttpResponse(bool close) : 

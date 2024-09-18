@@ -15,7 +15,7 @@
 #include <string>
 
 NAMESPACE_BEGIN
-class HttpServer {
+class API HttpServer {
 public:
   using HttpCallback = std::function<void(const HttpRequest &, HttpResponse *)>;
   HttpServer(EventLoop *loop, const InetAddress &listen_addr,

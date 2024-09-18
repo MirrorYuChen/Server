@@ -11,7 +11,7 @@
 #include <unordered_map>
 
 NAMESPACE_BEGIN
-class HttpRequest {
+class API HttpRequest {
 public:
   enum Method {
     kInvalid = -1,

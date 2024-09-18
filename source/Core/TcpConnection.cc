@@ -64,19 +64,6 @@ void TcpConnection::Send(const std::string &buf) {
   }
 }
 
-void TcpConnection::Send(Buffer *buf) {
-  if (state_ == kConnected) {
-    std::string str = buf->RetrieveAllAsString();
-    if (loop_->isInLoopThread()) {
-      SendInLoop(str);
-    } else {
-      loop_->RunInLoop(
-        std::bind(&TcpConnection::SendInLoop, this, str)
-      );
-    }
-  }
-}
-
 void TcpConnection::SendInLoopImpl(const void *msg, size_t len) {
   ssize_t nwrote = 0;
   size_t remaining = len;

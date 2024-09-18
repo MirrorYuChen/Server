@@ -80,7 +80,9 @@ void HttpServer::onRequest(const TcpConnectionPtr &conn,
   cb_(req, &response);
   Buffer buf;
   response.AppendToBuffer(&buf);
-  conn->Send(&buf);
+  std::string str = buf.RetrieveAllAsString();
+  LogDebug("response: {}.", str);
+  conn->Send(str);
   if (response.closeConnection()) {
     conn->Shutdown();
   }

@@ -57,6 +57,9 @@ public:
 private:
   char *begin();
   const char *begin() const;
+  char *beginWrite();
+  const char *beginWrite() const;
+
   void MakeSpace(int len);
 
 private:
