@@ -62,7 +62,7 @@ void HttpRequest::setQuery(const char *start, const char *end) {
 }
 
 void HttpRequest::AddHeader(const char *start, const char *colon, const char *end) {
-  std::string field(start, end);
+  std::string field(start, colon);
   ++colon;
   // 1.从前往后跳过空格
   while (colon < end && isspace(*colon)) {

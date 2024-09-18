@@ -6,6 +6,7 @@
  */
 #include "Http/HttpContext.h"
 #include "Base/Buffer.h"
+#include "Base/Logger.h"
 
 NAMESPACE_BEGIN
 HttpContext::HttpContext() : state_(kExpectRequestLine) {
@@ -21,6 +22,7 @@ bool HttpContext::ParseRequestLine(const char *begin, const char *end) {
 
   // 1.成功解析出method
   if (space != end && req_.setMethod(start, space)) {
+    LogDebug("method: {}.", req_.methodString());
     // 1.1 跳过并查找下一个空格
     start = space + 1;
     space = std::find(start, end, ' ');
@@ -36,6 +38,7 @@ bool HttpContext::ParseRequestLine(const char *begin, const char *end) {
     } else {
       req_.setPath(start, space);
     }
+    LogDebug("path: {}, query: {}.", req_.path(), req_.query());
     start = space + 1;
 
     // 1.3 解析version信息
@@ -49,6 +52,7 @@ bool HttpContext::ParseRequestLine(const char *begin, const char *end) {
         succeed = false;
       }
     }
+    LogDebug("version: {}.", req_.version());
   }
   return succeed;
 }
@@ -90,6 +94,10 @@ bool HttpContext::ParseRequest(Buffer *buffer, Timestamp recv_time) {
     } else if (state_ == kExpectBody) {
       // TODO:
     }
+  }
+  const auto &headers = req_.headers();
+  for (const auto &header : headers) {
+    LogDebug("header => key: {}, value: {}.", header.first, header.second);
   }
   return ok;
 }
