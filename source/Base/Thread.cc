@@ -10,7 +10,7 @@
 #include <memory>
 
 NAMESPACE_BEGIN
-std::atomic_int32_t Thread::num_created_(0);
+Thread::atomic_int32_t Thread::num_created_(0);
 
 Thread::Thread(ThreadFunc func, const std::string &name) :
   started_(false), joined_(false), tid_(0), 

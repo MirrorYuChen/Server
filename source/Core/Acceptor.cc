@@ -11,7 +11,7 @@
 
 NAMESPACE_BEGIN
 static int CreateNonBlocking() {
-  int sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+  int sockfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
   CHECK(sockfd != -1) << "Create socket error.";
   return sockfd;
 }
