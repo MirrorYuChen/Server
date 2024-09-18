@@ -24,6 +24,7 @@ TcpConnection::TcpConnection(
   const InetAddress &peer_addr) :
   loop_(CheckLoopNotNull(loop)),
   name_(name),
+  state_(kConnecting),
   reading_(true),
   socket_(new Socket(sockfd)),
   channel_(new Channel(loop, sockfd)),
@@ -151,9 +152,13 @@ void TcpConnection::ShutdownInLoop() {
 
 /// @brief 创建连接
 void TcpConnection::ConnectEstablished() {
+  // 1.建立连接，设置状态为连接态
   setState(kConnected);
+  // 2.让channel记录相关TcpConnection
   channel_->Tie(shared_from_this());
+  // 3.向poller注册channel的EPOLLIN读事件
   channel_->EnableReading();
+  // 4.调用连接回调函数
   conn_cb_(shared_from_this());
 }
 

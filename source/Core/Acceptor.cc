@@ -29,6 +29,8 @@ Acceptor::Acceptor(EventLoop *loop, const InetAddress &listen_addr, bool reuse_a
   /**
    * 有新用户连接时，需要执行一个回调函数
    * 因此向封装了accept_socket_的channel注册回调函数
+   * 在HandleRead函数中会调用设置的回调函数cb_
+   * cb_对应于TcpServer::NewConnection函数
    */
   accept_channel_.setReadCallback(
     std::bind(&Acceptor::HandleRead, this)
@@ -50,9 +52,12 @@ void Acceptor::Listen() {
 }
 
 void Acceptor::HandleRead() {
+  // 1.接收client的socketfd
   InetAddress peer_addr;
   int connfd = accept_socket_.Accept(&peer_addr);
+  // 2.接收到client的连接
   if (connfd != -1) {
+    // 2.1 调用设置的连接回调函数：TcpServer::NewConnection
     if (cb_) {
       cb_(connfd, peer_addr);
     } else {
@@ -61,7 +66,7 @@ void Acceptor::HandleRead() {
     }
   } else {
     LogError("Accept() failed.");
-    // 当前进程的fd用完，达到单个服务器fd上限
+    // 3.当前进程的fd用完，达到单个服务器fd上限
     if (errno == EMFILE) {
       LogError("sockfd reached limit.");
     }

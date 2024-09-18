@@ -68,14 +68,12 @@ void TcpServer::NewConnection(int sockfd, const InetAddress &peer_addr) {
 
   // 3.构建TcpConnectionPtr，并进行存储
   InetAddress local_addr(local);
-  TcpConnectionPtr conn_ptr(
-    new TcpConnection(
-      io_loop,
-      conn_name,
-      sockfd,
-      local_addr,
-      peer_addr
-    )
+  TcpConnectionPtr conn_ptr = std::make_shared<TcpConnection>(
+    io_loop,
+    conn_name,
+    sockfd,
+    local_addr,
+    peer_addr
   );
   conns_[conn_name] = conn_ptr;
 
