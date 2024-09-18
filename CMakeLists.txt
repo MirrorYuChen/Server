@@ -44,6 +44,7 @@ set(TEST_LIST
   TestLogger
   TestSocket
   TestServer
+  TestHttpServer
 )
 
 foreach(TEST ${TEST_LIST})
