@@ -53,7 +53,7 @@ void TcpServer::Start() {
 void TcpServer::NewConnection(int sockfd, const InetAddress &peer_addr) {
   // 1.轮询算法选择一个subLoop管理connfd对应channel
   EventLoop *io_loop = thread_pool_->getNextLoop();
-  std::string conn_name = ip_port_ + "#" + std::to_string(next_conn_id_++);
+  std::string conn_name = name_ + "-" + ip_port_ + "#" + std::to_string(next_conn_id_++);
   LogInfo("TcpServer::NewConnection [{}] - new connection [{}] from {}", 
     name_, conn_name, peer_addr.toIpPort()
   );

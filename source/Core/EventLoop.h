@@ -33,7 +33,6 @@ class Poller;
 class API EventLoop {
 public:
   using Functor = std::function<void()>;
-  using ChannelList = std::vector<Channel*>;
 
   EventLoop();
   ~EventLoop();
@@ -101,6 +100,7 @@ private:
   std::unique_ptr<Channel> wakeup_channel_;
 
   /// @brief epoll_wait后获取到的事件
+  using ChannelList = std::vector<Channel*>;
   ChannelList active_channels_;
 
   /// @brief 当前正在处理的Channel
