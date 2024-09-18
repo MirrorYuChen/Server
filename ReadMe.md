@@ -10,6 +10,7 @@
 --|--
 20240910 | 1.创建项目，添加Logger模块封装；2.添加Socket和InetAddress封装；
 20240911 | 1.添加poller，Channel，EventLoop封装；2.添加EventLoopThread和EventLoopThreadPool相关封装和实现；3.添加TcpConnection和Acceptor相关代码实现；4.添加TcpServer及EchoServer测试用例；
+20240918 | 1.添加Http服务基本实现及bug修复；
 
 ## 3.使用方法
  - [1] 编译运行server
@@ -36,3 +37,6 @@ hello
 ## 参考资料
  - [1] [30dayMakeCppServer](https://github.com/yuesong-feng/30dayMakeCppServer)
  - [2] [muduo](https://github.com/chenshuo/muduo)
+ - [3] [A-Tiny-Network-Library](https://github.com/Shangyizhou/A-Tiny-Network-Library)
+ - [4] [TinyWebServer](https://github.com/qinguoyi/TinyWebServer)
+
