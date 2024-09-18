@@ -5,10 +5,11 @@
  * @Description: HttpRequest
  */
 #include "Http/HttpRequest.h"
+#include "Base/Logger.h"
 
 NAMESPACE_BEGIN
 const std::unordered_map<std::string, HttpRequest::Method> StringToMethod = {
-  {"Get", HttpRequest::kGet},
+  {"GET", HttpRequest::kGet},
   {"POST", HttpRequest::kPost},
   {"HEAD", HttpRequest::kHead},
   {"PUT", HttpRequest::kPut},
@@ -16,7 +17,7 @@ const std::unordered_map<std::string, HttpRequest::Method> StringToMethod = {
 };
 
 const std::unordered_map<HttpRequest::Method, std::string> MethodToString = {
-  {HttpRequest::kGet, "Get"},
+  {HttpRequest::kGet, "GET"},
   {HttpRequest::kPost, "POST"},
   {HttpRequest::kHead, "HEAD"},
   {HttpRequest::kPut, "PUT"},

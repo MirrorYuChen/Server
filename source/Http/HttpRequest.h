@@ -14,12 +14,12 @@ NAMESPACE_BEGIN
 class HttpRequest {
 public:
   enum Method {
-    kInvalid,
-    kGet,
-    kPost,
-    kHead,
-    kPut,
-    kDelete,
+    kInvalid = -1,
+    kGet = 0,
+    kPost = 1,
+    kHead = 2,
+    kPut = 3,
+    kDelete = 4,
   };
 
   enum Version {

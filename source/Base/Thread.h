@@ -13,10 +13,6 @@
 #include <string>
 #include <atomic>
 
-namespace std {
-  typedef atomic<std::int32_t> atomic_int32_t;
-}
-
 NAMESPACE_BEGIN
 class API Thread {
 public:
@@ -56,8 +52,9 @@ private:
   pid_t tid_;                             // 线程tid
   ThreadFunc func_;                       // 线程函数
 
+  using atomic_int32_t = std::atomic<std::int32_t>;
   std::string name_;                       // 线程名
-  static std::atomic_int32_t num_created_; // 线程索引
+  static atomic_int32_t num_created_; // 线程索引
 };
 
 NAMESPACE_END

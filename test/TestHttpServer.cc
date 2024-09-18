@@ -44,6 +44,7 @@ void onRequest(const HttpRequest &req, HttpResponse *resp) {
 }
 
 int main(int argc, char *argv[]) {
+  setLogPath("./log.txt");
   EventLoop loop;
   HttpServer server(&loop, InetAddress("0.0.0.0", 8080), "http-server");
   server.setHttpCallback(onRequest);
