@@ -118,7 +118,7 @@ ConnectionPollRAII::~ConnectionPollRAII() {
 
 bool ConnectionPollRAII::Execute(const std::string &sql) {
   if (mysql_query(conn_raii, sql.c_str()) != 0) {
-    LogError("Failed Execute {}.", sql);
+    LogError("Failed Execute {}, Error is: {}.", sql, mysql_error(conn_raii));
     return false;
   }
   return true;
@@ -126,7 +126,7 @@ bool ConnectionPollRAII::Execute(const std::string &sql) {
 
 MYSQL_RES *ConnectionPollRAII::Query(const std::string &sql) {
   if (!Execute(sql)) {
-    LogError("Failed Query {}.", sql);
+    LogError("Failed Query {}, Error is: {}.", sql, mysql_error(conn_raii));
     return nullptr;
   }
   return mysql_use_result(conn_raii);
