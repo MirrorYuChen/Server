@@ -39,7 +39,7 @@ void ConnectionPool::Init(
     MYSQL *conn = NULL;
     conn = mysql_init(conn);
     if (conn == NULL) {
-      LogError("MySQL Error.");
+      LogError("init mysql failed.");
       exit(1);
     }
     conn = mysql_real_connect(
@@ -47,8 +47,12 @@ void ConnectionPool::Init(
       dbname_.c_str(), port_, NULL, 0
     );
     if (conn == NULL) {
-      LogError("MySQL Error.");
+      LogError("connect mysql failed!");
       exit(1);
+    } else {
+      // 设置中文数据集，C和C++代码默认的编码字符是ASCII，若不设置，中文都会乱码
+      mysql_query(conn, "set names gbk");
+      LogInfo("connect mysql succeed!");
     }
     conn_list_.push_back(conn);
     ++free_conn_;
@@ -103,15 +107,29 @@ void ConnectionPool::DestroyPool() {
   locker_.Unlock();
 }
 
-ConnectionPollRAII::ConnectionPollRAII(MYSQL **conn, ConnectionPool *pool) {
-  *conn = pool->getConnection();
-
-  conn_raii = *conn;
+ConnectionPollRAII::ConnectionPollRAII(ConnectionPool *pool) {
+  conn_raii = pool->getConnection();
   poll_raii = pool;
 }
 
 ConnectionPollRAII::~ConnectionPollRAII() {
   poll_raii->ReleaseConnection(conn_raii);
+}
+
+bool ConnectionPollRAII::Update(const std::string &sql) {
+  if (mysql_query(conn_raii, sql.c_str()) != 0) {
+    LogError("Failed Update {}.", sql);
+    return false;
+  }
+  return true;
+}
+
+MYSQL_RES *ConnectionPollRAII::Query(const std::string &sql) {
+  if (mysql_query(conn_raii, sql.c_str()) != 0) {
+    LogError("Failed Update {}.", sql);
+    return nullptr;
+  }
+  return mysql_use_result(conn_raii);
 }
 
 NAMESPACE_END

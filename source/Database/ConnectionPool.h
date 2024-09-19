@@ -54,8 +54,11 @@ private:
 
 class ConnectionPollRAII {
 public:
-  ConnectionPollRAII(MYSQL **conn, ConnectionPool *pool);
+  ConnectionPollRAII(ConnectionPool *pool);
   ~ConnectionPollRAII();
+
+  bool Update(const std::string &sql);
+  MYSQL_RES *Query(const std::string &sql);
 
 private:
   MYSQL *conn_raii;
