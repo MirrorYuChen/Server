@@ -116,17 +116,17 @@ ConnectionPollRAII::~ConnectionPollRAII() {
   poll_raii->ReleaseConnection(conn_raii);
 }
 
-bool ConnectionPollRAII::Update(const std::string &sql) {
+bool ConnectionPollRAII::Execute(const std::string &sql) {
   if (mysql_query(conn_raii, sql.c_str()) != 0) {
-    LogError("Failed Update {}.", sql);
+    LogError("Failed Execute {}.", sql);
     return false;
   }
   return true;
 }
 
 MYSQL_RES *ConnectionPollRAII::Query(const std::string &sql) {
-  if (mysql_query(conn_raii, sql.c_str()) != 0) {
-    LogError("Failed Update {}.", sql);
+  if (!Execute(sql)) {
+    LogError("Failed Query {}.", sql);
     return nullptr;
   }
   return mysql_use_result(conn_raii);
