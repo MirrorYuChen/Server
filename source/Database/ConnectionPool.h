@@ -16,14 +16,35 @@ NAMESPACE_BEGIN
 /// @brief SQL数据库连接池
 class API ConnectionPool {
 public:
+  /// @brief 单例模式，获取连接池单例
+  /// @return 连接池单例
+  static ConnectionPool *getInstance();
+
+  /// @brief 获取一条连接
+  /// @return 一条连接
   MYSQL *getConnection();
+
+  /// @brief 用完连接后，将连接存回连接池中
+  /// @param conn 当前连接
+  /// @return 当前连接是否为nullptr
   bool ReleaseConnection(MYSQL *conn);
+
+  /// @brief 返回当前空闲连接数
+  /// @return 当前空闲连接数
   int freeConn() const {
     return free_conn_;
   }
 
+  /// @brief 销毁连接池
   void DestroyPool();
-  static ConnectionPool *getInstance();
+
+  /// @brief 初始化连接池
+  /// @param url 主机地址 
+  /// @param user 登录用户名
+  /// @param passwd 登录用户密码
+  /// @param dbname 使用数据库名
+  /// @param port 数据库端口
+  /// @param max_conn 最大连接数
   void Init(
     const std::string &url,
     const std::string &user,
@@ -34,7 +55,10 @@ public:
   );
 
 private:
+  /// @brief 构造函数
   ConnectionPool();
+  
+  /// @brief 析构函数
   ~ConnectionPool();
 
 private:
