@@ -94,14 +94,14 @@ private:
 };
 
 /// @brief SQL连接池的RAII封装
-class API ConnectionPollRAII {
+class API ConnectionPoolRAII {
 public:
   /// @brief 连接池RAII封装构造函数
   /// @param pool 注入的连接池
-  ConnectionPollRAII(ConnectionPool *pool);
+  ConnectionPoolRAII(ConnectionPool *pool);
 
   /// @brief 连接池RAII析构函数，利用对象生命周期，完成连接回收
-  ~ConnectionPollRAII();
+  ~ConnectionPoolRAII();
 
   /// @brief 执行操作
   /// @param sql 待执行的语句

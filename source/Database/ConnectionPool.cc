@@ -107,16 +107,16 @@ void ConnectionPool::DestroyPool() {
   locker_.Unlock();
 }
 
-ConnectionPollRAII::ConnectionPollRAII(ConnectionPool *pool) {
+ConnectionPoolRAII::ConnectionPoolRAII(ConnectionPool *pool) {
   conn_raii = pool->getConnection();
   poll_raii = pool;
 }
 
-ConnectionPollRAII::~ConnectionPollRAII() {
+ConnectionPoolRAII::~ConnectionPoolRAII() {
   poll_raii->ReleaseConnection(conn_raii);
 }
 
-bool ConnectionPollRAII::Execute(const std::string &sql) {
+bool ConnectionPoolRAII::Execute(const std::string &sql) {
   if (mysql_query(conn_raii, sql.c_str()) != 0) {
     LogError("Failed Execute {}, Error is: {}.", sql, mysql_error(conn_raii));
     return false;
@@ -124,7 +124,7 @@ bool ConnectionPollRAII::Execute(const std::string &sql) {
   return true;
 }
 
-MYSQL_RES *ConnectionPollRAII::Query(const std::string &sql) {
+MYSQL_RES *ConnectionPoolRAII::Query(const std::string &sql) {
   if (!Execute(sql)) {
     LogError("Failed Query {}, Error is: {}.", sql, mysql_error(conn_raii));
     return nullptr;
