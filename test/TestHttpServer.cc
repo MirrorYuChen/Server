@@ -3,9 +3,23 @@
 #include "Http/HttpResponse.h"
 #include "Http/HttpServer.h"
 #include "Base/Timestamp.h"
+#include <fstream>
+#include <sstream>
 
 extern char favicon[555];
 using namespace NAMESPACE;
+
+std::string ReadFileToString(const std::string &filepath) {
+  std::ifstream ifs(filepath, std::ios::in | std::ios::binary);
+  if (!ifs.is_open()) {
+    std::cerr << "Could not open file: " << filepath << "\n";
+    return "";
+  }
+  std::ostringstream oss;
+  oss << ifs.rdbuf();
+  ifs.close();
+  return oss.str();
+}
 
 void onRequest(const HttpRequest &req, HttpResponse *resp) {
   std::cout << "Headers " << req.methodString() << " " << req.path()
