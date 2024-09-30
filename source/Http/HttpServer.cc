@@ -75,7 +75,6 @@ void HttpServer::onRequest(const TcpConnectionPtr &conn,
     req.version() == HttpRequest::kHttp10 && 
     connection != "Keep-Alive"
   );
-  close = true;
   HttpResponse response(close);
   cb_(req, &response);
   Buffer buf;
