@@ -9,18 +9,6 @@
 extern char favicon[555];
 using namespace NAMESPACE;
 
-std::string ReadFileToString(const std::string &filepath) {
-  std::ifstream ifs(filepath, std::ios::in | std::ios::binary);
-  if (!ifs.is_open()) {
-    std::cerr << "Could not open file: " << filepath << "\n";
-    return "";
-  }
-  std::ostringstream oss;
-  oss << ifs.rdbuf();
-  ifs.close();
-  return oss.str();
-}
-
 void onRequest(const HttpRequest &req, HttpResponse *resp) {
   std::cout << "Headers " << req.methodString() << " " << req.path()
             << std::endl;
@@ -31,29 +19,20 @@ void onRequest(const HttpRequest &req, HttpResponse *resp) {
   }
 
   if (req.path() == "/") {
-    resp->setStatusCode(HttpResponse::kOK);
-    resp->setStatusMessage("OK");
-    resp->setContentType("text/html");
-    resp->AddHeader("Server", "Muduo");
     std::string now = Timestamp::Now().toFormattedString();
-    resp->setBody("<html><head><title>This is title</title></head>"
-                  "<body><h1>Hello</h1>Now is " +
-                  now + "</body></html>");
-  } else if (req.path() == "/favicon.ico") {
-    resp->setStatusCode(HttpResponse::kOK);
-    resp->setStatusMessage("OK");
-    resp->setContentType("image/png");
-    resp->setBody(std::string(favicon, sizeof favicon));
+    resp->AddBodyString(
+      "<html><head><title>This is title</title></head>"
+      "<body><h1>Hello</h1>Now is " + now + "</body></html>", 
+      "text/html"
+    );
+  } else if (req.path() == "/index") {
+    resp->AddBodyFile("../data/resources/index.html");
   } else if (req.path() == "/hello") {
-    resp->setStatusCode(HttpResponse::kOK);
-    resp->setStatusMessage("OK");
-    resp->setContentType("text/plain");
-    resp->AddHeader("Server", "Muduo");
-    resp->setBody("hello, world!\n");
+    resp->AddBodyString("hello, world!\n", "text/plain");
   } else {
-    resp->setStatusCode(HttpResponse::kNotFound);
-    resp->setStatusMessage("Not Found");
-    resp->setCloseConnection(true);
+    resp->setCode(404);
+    resp->setIsKeepAlive(false);
+    resp->AddBodyString("Not Found", "text/plain");
   }
 }
 

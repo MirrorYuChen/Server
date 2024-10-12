@@ -22,24 +22,18 @@ public:
     kDelete = 4,
   };
 
-  enum Version {
-    kUnknown,
-    kHttp10,
-    kHttp11,
-  };
-
   HttpRequest();
   ~HttpRequest();
 
   /// @brief 设置版本
   /// @param version 版本
-  void setVersion(Version version) {
+  void setVersion(const std::string &version) {
     version_ = version;
   }
 
   /// @brief 获取版本
   /// @return 版本
-  const Version version() const {
+  const std::string &version() const {
     return version_;
   }
 
@@ -112,9 +106,11 @@ public:
 
   void Swap(HttpRequest &other);
 
+  const bool IsKeepAlive() const;
+
 private:
   Method method_;
-  Version version_;
+  std::string version_;
   std::string path_;
   std::string query_;
   Timestamp recv_time_;

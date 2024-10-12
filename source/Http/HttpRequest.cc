@@ -24,7 +24,7 @@ const std::unordered_map<HttpRequest::Method, std::string> MethodToString = {
   {HttpRequest::kDelete, "DELETE"}
 };
 
-HttpRequest::HttpRequest() : method_(kInvalid), version_(kUnknown) {
+HttpRequest::HttpRequest() : method_(kInvalid), version_("Unknown") {
 
 }
 
@@ -91,6 +91,13 @@ void HttpRequest::Swap(HttpRequest &other) {
   query_.swap(other.query_);
   std::swap(recv_time_, other.recv_time_);
   headers_.swap(other.headers_);
+}
+
+const bool HttpRequest::IsKeepAlive() const {
+  if (getHeader("Connection") == "keep-alive" && version() == "1.1") {
+    return true;
+  }
+  return false;
 }
 
 NAMESPACE_END

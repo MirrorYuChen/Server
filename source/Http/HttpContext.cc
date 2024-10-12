@@ -45,9 +45,9 @@ bool HttpContext::ParseRequestLine(const char *begin, const char *end) {
     succeed = (end - start == 8 && std::equal(start, end - 1, "HTTP/1."));
     if (succeed) {
       if (*(end - 1) == '1') {
-        req_.setVersion(HttpRequest::kHttp11);
+        req_.setVersion("1.1");
       } else if (*(end - 1) == '0') {
-        req_.setVersion(HttpRequest::kHttp10);
+        req_.setVersion("1.0");
       } else {
         succeed = false;
       }

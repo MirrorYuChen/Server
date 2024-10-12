@@ -8,60 +8,40 @@
 
 #include "Api.h"
 #include <string>
+#include <sys/stat.h>
 #include <unordered_map>
+#include <memory>
 
 NAMESPACE_BEGIN
 class Buffer;
 class API HttpResponse {
 public:
-  enum HttpStatusCode {
-    kUnknown,
-    kOK = 200,
-    kMovedPermanently = 301,
-    kBadRequest = 400,
-    kNotFound = 404,
-  };
+  HttpResponse() = default;
+  ~HttpResponse() = default;
 
-  explicit HttpResponse(bool close);
-  ~HttpResponse();
+  void Init(bool is_keep_alive = false, int code = -1);
+  void AddBodyString(const std::string &str, const std::string &type);
+  void AddBodyFile(const std::string &path);
 
-  void setStatusCode(HttpStatusCode code) {
-    status_code_ = code;
-  }
+  void setCode(int code) { code_ = code; }
+  void setIsKeepAlive(bool is_keep_alive) { is_keep_alive_ = is_keep_alive; }
 
-  void setStatusMessage(const std::string &msg) {
-    status_msg_ = msg;
-  }
-
-  void setCloseConnection(bool on) {
-    close_connection_ = on;
-  }
-
-  const bool closeConnection() const {
-    return close_connection_;
-  }
-
-  void setContentType(const std::string &type) {
-    AddHeader("Content-Type", type);
-  }
-
-  void AddHeader(const std::string &key, const std::string &value) {
-    headers_[key] = value;
-  }
-
-  void setBody(const std::string &body) {
-    body_ = body;
-  }
-
-  void AppendToBuffer(Buffer *output) const;
+  Buffer *getOutputBuffer() { return output_buffer_.get(); }
 
 private:
-  std::unordered_map<std::string, std::string> headers_;
-  HttpStatusCode status_code_;
-  std::string status_msg_;
-  bool close_connection_;
-  std::string body_;
-};
+  void AddStateLine();
+  void AddHeaders();
 
+  void AddErrorHtml();
+  const std::string getFileType(const std::string &path) const;
+  void AddErrorBody(const std::string &err_msg);
+  void AddContentType(const std::string &type);
+
+private:
+  int code_ {-1};
+  bool is_keep_alive_ {false};
+  struct stat file_stat_{0};
+  std::unique_ptr<Buffer> output_buffer_ {nullptr};
+};
 
 NAMESPACE_END

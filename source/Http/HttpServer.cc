@@ -14,9 +14,9 @@ NAMESPACE_BEGIN
  * 设置响应状态码，响应信息并关闭连接
  */
 void DefaultHttpCallback(const HttpRequest &, HttpResponse *resp) {
-  resp->setStatusCode(HttpResponse::kNotFound);
-  resp->setStatusMessage("Not Found");
-  resp->setCloseConnection(true);
+  resp->setCode(404);
+  resp->setIsKeepAlive(false);
+  resp->AddBodyString("Not Found", "text/plain");
 }
 
 HttpServer::HttpServer(EventLoop *loop, const InetAddress &listen_addr,
@@ -50,8 +50,6 @@ void HttpServer::onConnection(const TcpConnectionPtr &conn) {
 void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf,
                            Timestamp recv_time) {
   std::unique_ptr<HttpContext> context(new HttpContext);
-
-
   // 进行状态机解析
   // 错误则发送 BAD REQUEST 半关闭
   if (!context->ParseRequest(buf, recv_time)) {
@@ -71,18 +69,13 @@ void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf,
 void HttpServer::onRequest(const TcpConnectionPtr &conn,
                            const HttpRequest &req) {
   const std::string &connection = req.getHeader("Connection");
-  bool close = connection == "close" || (
-    req.version() == HttpRequest::kHttp10 && 
-    connection != "Keep-Alive"
-  );
-  HttpResponse response(close);
-  cb_(req, &response);
-  Buffer buf;
-  response.AppendToBuffer(&buf);
-  std::string str = buf.RetrieveAllAsString();
+  HttpResponse resp;
+  resp.Init(req.IsKeepAlive());
+  cb_(req, &resp);
+  std::string str = resp.getOutputBuffer()->RetrieveAllAsString();
   LogDebug("response: {}.", str);
   conn->Send(str);
-  if (response.closeConnection()) {
+  if (close) {
     conn->Shutdown();
   }
 }
