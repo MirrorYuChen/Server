@@ -30,8 +30,7 @@ public:
 
   void Reset() {
     state_ = kExpectRequestLine;
-    HttpRequest dummy;
-    req_.Swap(dummy);
+    req_.Reset();
   }
 
   const HttpRequest &request() const {
@@ -43,7 +42,10 @@ public:
   }
 
 private:
-  bool ParseRequestLine(const char *begin, const char *end);
+  bool ParseRequestLine(const std::string &line);
+  void ParseHeaders(const std::string &line);
+  void ParseBody(const std::string &line);
+  void ParsePath();
 
 private:
   HttpRequestParseState state_;
