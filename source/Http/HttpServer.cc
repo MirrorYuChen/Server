@@ -7,15 +7,8 @@
 #include "Http/HttpServer.h"
 #include "Http/HttpContext.h"
 #include <memory>
-#include <unordered_set>
-#include <unordered_map>
 
 NAMESPACE_BEGIN
-const std::unordered_set<std::string> DefaultHtml {
-  "/index", "/register", "/login",
-  "/welcome", "/video", "/image",
-};
-
 HttpServer::HttpServer(EventLoop *loop, const InetAddress &listen_addr,
                        const std::string &name, const std::string &root_path, 
                        TcpServer::Option option)
@@ -65,20 +58,13 @@ void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf,
 
 void HttpServer::onRequest(const TcpConnectionPtr &conn,
                            const HttpRequest &req) {
-  const std::string &connection = req.getHeader("Connection");
   HttpResponse resp(root_path_);
   resp.Init(req.IsKeepAlive());
-  std::string path = req.path();
-  if (path == "/") {
-    path = "/index.html";
-  } else {
-    if (DefaultHtml.find(path) != DefaultHtml.end()) {
-      path += ".html";
-    }
-  }
-  LogInfo("Path: {}.", path);
-  resp.MakeResponse(path);
-  std::string str = resp.getOutputBuffer()->RetrieveAllAsString();
+  LogInfo("Path: {}.", req.path());
+  resp.setPath(req.path());
+  Buffer buffer;
+  resp.MakeResponse(&buffer);
+  std::string str = buffer.RetrieveAllAsString();
   LogDebug("response: {}.", str);
   conn->Send(str);
   if (!req.IsKeepAlive()) {

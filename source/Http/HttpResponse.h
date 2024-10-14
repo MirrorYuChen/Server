@@ -20,23 +20,21 @@ public:
   ~HttpResponse() = default;
 
   void Init(bool is_keep_alive = false, int code = -1);
-  void MakeResponse(const std::string &str, const std::string &type);
-  void MakeResponse(const std::string &path);
+  void MakeResponse(const std::string &str, const std::string &type, Buffer *buffer = nullptr);
+  void MakeResponse(Buffer *buffer);
 
   void setCode(int code) { code_ = code; }
   void setPath(const std::string &path) { path_ = path; }
   void setIsKeepAlive(bool is_keep_alive) { is_keep_alive_ = is_keep_alive; }
 
-  Buffer *getOutputBuffer() { return output_buffer_.get(); }
-
 private:
-  void AddStateLine();
-  void AddHeaders();
+  void AddStateLine(Buffer *buffer);
+  void AddHeaders(Buffer *buffer);
 
   void AddErrorHtml();
   const std::string getFileType(const std::string &path) const;
-  void AddErrorBody(const std::string &err_msg);
-  void AddContentType(const std::string &type);
+  void AddErrorBody(const std::string &err_msg, Buffer *buffer);
+  void AddContentType(const std::string &type, Buffer *buffer);
 
 private:
   std::string root_path_;
@@ -44,7 +42,6 @@ private:
   int code_ {-1};
   bool is_keep_alive_ {false};
   struct stat file_stat_{0};
-  std::unique_ptr<Buffer> output_buffer_ {nullptr};
 };
 
 NAMESPACE_END

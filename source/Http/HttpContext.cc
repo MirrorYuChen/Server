@@ -8,8 +8,14 @@
 #include "Base/Buffer.h"
 #include "Base/Logger.h"
 #include <regex>
+#include <unordered_set>
 
 NAMESPACE_BEGIN
+const std::unordered_set<std::string> DefaultHtml {
+  "/index", "/register", "/login",
+  "/welcome", "/video", "/image",
+};
+
 HttpContext::HttpContext() : state_(kExpectRequestLine) {
 
 }
@@ -45,6 +51,18 @@ void HttpContext::ParseBody(const std::string &line) {
   state_ = kGotAll;
 }
 
+void HttpContext::ParsePath() {
+  std::string path = req_.path();
+  if (path == "/") {
+    path = "/index.html";
+  } else {
+    if (DefaultHtml.find(path) != DefaultHtml.end()) {
+      path += ".html";
+    }
+  }
+  req_.setPath(path);
+}
+
 
 bool HttpContext::ParseRequest(Buffer *buffer, Timestamp recv_time) {
   if (buffer->ReadableBytes() <= 0) {
@@ -61,6 +79,7 @@ bool HttpContext::ParseRequest(Buffer *buffer, Timestamp recv_time) {
         if (!ParseRequestLine(line)) {
           return false;
         }
+        ParsePath();
         break;
       case kExpectHeaders:
         ParseHeaders(line);

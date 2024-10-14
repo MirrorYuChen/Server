@@ -54,10 +54,9 @@ HttpResponse::HttpResponse(const std::string &root_path) : root_path_(root_path)
 void HttpResponse::Init(bool is_keep_alive, int code) {
   code_ = code;
   is_keep_alive_ = is_keep_alive;
-  output_buffer_.reset(new Buffer());
 }
 
-void HttpResponse::AddStateLine() {
+void HttpResponse::AddStateLine(Buffer *buffer) {
   std::string code_msg;
   if (CodeToMessage.find(code_) != CodeToMessage.end()) {
     code_msg = CodeToMessage.at(code_);
@@ -65,36 +64,35 @@ void HttpResponse::AddStateLine() {
     code_ = 400;
     code_msg = CodeToMessage.at(400);
   }
-  output_buffer_->Append("HTTP/1.1 " + std::to_string(code_) + " " + code_msg + "\r\n");
+  buffer->Append("HTTP/1.1 " + std::to_string(code_) + " " + code_msg + "\r\n");
 }
 
-void HttpResponse::AddHeaders() {
-  output_buffer_->Append("Connection: ");
+void HttpResponse::AddHeaders(Buffer *buffer) {
+  buffer->Append("Connection: ");
   if (is_keep_alive_) {
-    output_buffer_->Append("keep-alive\r\n");
-    output_buffer_->Append("Keep-Alive: timeout=120, max=6\r\n");
+    buffer->Append("keep-alive\r\n");
+    buffer->Append("Keep-Alive: timeout=120, max=6\r\n");
   } else {
-    output_buffer_->Append("close\r\n");
+    buffer->Append("close\r\n");
   }
 }
 
-void HttpResponse::AddContentType(const std::string &type) {
-  output_buffer_->Append("Content-Type: " + type + "\r\n");
+void HttpResponse::AddContentType(const std::string &type, Buffer *buffer) {
+  buffer->Append("Content-Type: " + type + "\r\n");
 }
 
-void HttpResponse::MakeResponse(const std::string &body, const std::string &type) {
-  AddStateLine();
-  AddHeaders();
-  AddContentType(type);
-  output_buffer_->Append("Content-Length: " + std::to_string(body.size()) + "\r\n");
-  output_buffer_->Append("\r\n");
-  output_buffer_->Append(body);
+void HttpResponse::MakeResponse(const std::string &body, const std::string &type, Buffer *buffer) {
+  AddStateLine(buffer);
+  AddHeaders(buffer);
+  AddContentType(type, buffer);
+  buffer->Append("Content-Length: " + std::to_string(body.size()) + "\r\n");
+  buffer->Append("\r\n");
+  buffer->Append(body);
 }
 
-void HttpResponse::MakeResponse(const std::string &path) {
-  path_ = path;
+void HttpResponse::MakeResponse(Buffer *buffer) {
   // 1.请求资源文件检查
-  if(stat((root_path_ + path).data(), &file_stat_) < 0 || S_ISDIR(file_stat_.st_mode)) {
+  if(stat((root_path_ + path_).data(), &file_stat_) < 0 || S_ISDIR(file_stat_.st_mode)) {
     code_ = 404;
   } else if(!(file_stat_.st_mode & S_IROTH)) {
     code_ = 403;
@@ -103,38 +101,39 @@ void HttpResponse::MakeResponse(const std::string &path) {
   }
 
   // 2.错误资源文件检查
-  auto idx = path.find_last_of("/");
-  if (idx != std::string::npos) {
-    if (CodeToPath.find(code_) != CodeToPath.end()) {
-      path_ = CodeToPath.at(code_);
-      stat((root_path_ + path_).data(), &file_stat_);
-    }
-  }
+  AddErrorHtml();
 
   // 3.添加相应状态行
-  AddStateLine();
+  AddStateLine(buffer);
 
   // 4.添加头部信息
-  AddHeaders();
+  AddHeaders(buffer);
 
   // 5.添加文件类型
-  AddContentType(getFileType(path_));
+  AddContentType(getFileType(path_), buffer);
 
   // 5.添加文件内容
   LogInfo("add body: {}.", root_path_ + path_);
   int fd = open((root_path_ + path_).c_str(), O_RDONLY);
   if (fd < 0) {
-    AddErrorBody("File not found!");
+    AddErrorBody("File not found!", buffer);
     return;
   }
-  output_buffer_->Append("Content-Length: " + std::to_string(file_stat_.st_size) + "\r\n");
-  output_buffer_->Append("\r\n");
+  buffer->Append("Content-Length: " + std::to_string(file_stat_.st_size) + "\r\n");
+  buffer->Append("\r\n");
   int save_errno = 0;
-  int n = output_buffer_->ReadFd(fd, &save_errno);
+  int n = buffer->ReadFd(fd, &save_errno);
   if (n < 0) {
-    AddErrorBody("Read file error!");
+    AddErrorBody("Read file error!", buffer);
   }
   close(fd);
+}
+
+void HttpResponse::AddErrorHtml() {
+  if (CodeToPath.find(code_) != CodeToPath.end()) {
+    path_ = CodeToPath.at(code_);
+    stat((root_path_ + path_).data(), &file_stat_);
+  }
 }
 
 const std::string HttpResponse::getFileType(const std::string &path) const {
@@ -150,7 +149,7 @@ const std::string HttpResponse::getFileType(const std::string &path) const {
   }
 }
 
-void HttpResponse::AddErrorBody(const std::string &err_msg) {
+void HttpResponse::AddErrorBody(const std::string &err_msg, Buffer *buffer) {
   std::string body = "<html><title>Error</title><body bgcolor=\"ffffff\">";
   std::string code_msg;
   if (CodeToMessage.find(code_) != CodeToMessage.end()) {
@@ -162,8 +161,8 @@ void HttpResponse::AddErrorBody(const std::string &err_msg) {
   body += "<p>" + err_msg + "</p>";
   body += "<hr><em>HttpServer</em></body></html>";
 
-  output_buffer_->Append("Content-length: " + std::to_string(body.size()) + "\r\n\r\n");
-  output_buffer_->Append(body);
+  buffer->Append("Content-length: " + std::to_string(body.size()) + "\r\n\r\n");
+  buffer->Append(body);
 }
 
 NAMESPACE_END
