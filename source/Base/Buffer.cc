@@ -81,7 +81,7 @@ void Buffer::Append(const char *data, size_t len) {
 
 const char *Buffer::FindCRLF() const {
   const char *crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF + 2);
-  return crlf == beginWrite() ? NULL : crlf;
+  return crlf;
 }
 
 char *Buffer::begin() {

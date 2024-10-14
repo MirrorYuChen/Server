@@ -141,11 +141,12 @@ void HttpContext::ParsePosts() {
   }
 
   // 2.解析登录和注册信息
-  if (req_.path() == "/0" || req_.path() == "/1") {
+  if (DefaultHtmlTag.count(req_.path())) {
     std::string username = req_.getPost("username");
     std::string password = req_.getPost("password");
     LogInfo("username: {}, password: {}", username, password);
-    bool is_login = (req_.path() == "/1");
+    int tag = DefaultHtmlTag.at(req_.path());
+    bool is_login = (tag == 1);
     if (Verify(username, password, is_login)) {
       req_.setPath("/welcome.html");
     } else {
@@ -168,15 +169,12 @@ void HttpContext::ParsePath() {
 
 
 bool HttpContext::ParseRequest(Buffer *buffer, Timestamp recv_time) {
+  LogInfo("buffer: {}.", std::string(buffer->peek(), buffer->ReadableBytes()));
   if (buffer->ReadableBytes() <= 0) {
     return false;
   }
   while (buffer->ReadableBytes() > 0 && state_ != kGotAll) {
     const char *crlf = buffer->FindCRLF();
-    if (!crlf) {
-      LogInfo("no CRLF found, wait for more data");
-      break;
-    }
     std::string line(buffer->peek(), crlf);
     switch (state_) {
       case kExpectRequestLine:
@@ -188,7 +186,6 @@ bool HttpContext::ParseRequest(Buffer *buffer, Timestamp recv_time) {
       case kExpectHeaders:
         ParseHeaders(line);
         if (buffer->ReadableBytes() <= 2) {
-          LogInfo("kGotAll");
           state_ = kGotAll;
         }
         break;
