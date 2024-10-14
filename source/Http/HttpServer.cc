@@ -76,7 +76,7 @@ void HttpServer::onRequest(const TcpConnectionPtr &conn,
   std::string str = resp.getOutputBuffer()->RetrieveAllAsString();
   LogDebug("response: {}.", str);
   conn->Send(str);
-  if (close) {
+  if (!req.IsKeepAlive()) {
     conn->Shutdown();
   }
 }
