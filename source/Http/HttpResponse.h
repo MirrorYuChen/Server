@@ -20,10 +20,11 @@ public:
   ~HttpResponse() = default;
 
   void Init(bool is_keep_alive = false, int code = -1);
-  void AddBodyString(const std::string &str, const std::string &type);
-  void AddBodyFile(const std::string &path);
+  void MakeResponse(const std::string &str, const std::string &type);
+  void MakeResponse(const std::string &path);
 
   void setCode(int code) { code_ = code; }
+  void setPath(const std::string &path) { path_ = path; }
   void setIsKeepAlive(bool is_keep_alive) { is_keep_alive_ = is_keep_alive; }
 
   Buffer *getOutputBuffer() { return output_buffer_.get(); }
@@ -39,6 +40,7 @@ private:
 
 private:
   std::string root_path_;
+  std::string path_;
   int code_ {-1};
   bool is_keep_alive_ {false};
   struct stat file_stat_{0};

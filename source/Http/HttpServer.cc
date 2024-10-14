@@ -7,23 +7,19 @@
 #include "Http/HttpServer.h"
 #include "Http/HttpContext.h"
 #include <memory>
+#include <unordered_set>
+#include <unordered_map>
 
 NAMESPACE_BEGIN
-/**
- * 默认的http回调函数
- * 设置响应状态码，响应信息并关闭连接
- */
-void DefaultHttpCallback(const HttpRequest &, HttpResponse *resp) {
-  resp->setCode(404);
-  resp->setIsKeepAlive(false);
-  resp->AddBodyString("Not Found", "text/plain");
-}
+const std::unordered_set<std::string> DefaultHtml {
+  "/index", "/register", "/login",
+  "/welcome", "/video", "/image",
+};
 
 HttpServer::HttpServer(EventLoop *loop, const InetAddress &listen_addr,
                        const std::string &name, const std::string &root_path, 
                        TcpServer::Option option)
-    : server_(loop, listen_addr, name, option), root_path_(root_path),
-      cb_(DefaultHttpCallback) {
+    : server_(loop, listen_addr, name, option), root_path_(root_path) {
   server_.setConnectionCallback(
     std::bind(&HttpServer::onConnection, this, std::placeholders::_1)
   );
@@ -72,7 +68,16 @@ void HttpServer::onRequest(const TcpConnectionPtr &conn,
   const std::string &connection = req.getHeader("Connection");
   HttpResponse resp(root_path_);
   resp.Init(req.IsKeepAlive());
-  cb_(req, &resp);
+  std::string path = req.path();
+  if (path == "/") {
+    path = "/index.html";
+  } else {
+    if (DefaultHtml.find(path) != DefaultHtml.end()) {
+      path += ".html";
+    }
+  }
+  LogInfo("Path: {}.", path);
+  resp.MakeResponse(path);
   std::string str = resp.getOutputBuffer()->RetrieveAllAsString();
   LogDebug("response: {}.", str);
   conn->Send(str);

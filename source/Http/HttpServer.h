@@ -24,8 +24,6 @@ public:
 
   EventLoop *getLoop() const { return server_.getLoop(); }
 
-  void setHttpCallback(const HttpCallback &cb) { cb_ = cb; }
-
   void Start();
 
 private:
@@ -38,7 +36,6 @@ private:
 private:
   TcpServer server_;
   const std::string root_path_;
-  HttpCallback cb_;
 };
 
 NAMESPACE_END

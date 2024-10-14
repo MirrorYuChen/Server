@@ -82,7 +82,7 @@ void HttpResponse::AddContentType(const std::string &type) {
   output_buffer_->Append("Content-Type: " + type + "\r\n");
 }
 
-void HttpResponse::AddBodyString(const std::string &body, const std::string &type) {
+void HttpResponse::MakeResponse(const std::string &body, const std::string &type) {
   AddStateLine();
   AddHeaders();
   AddContentType(type);
@@ -91,10 +91,10 @@ void HttpResponse::AddBodyString(const std::string &body, const std::string &typ
   output_buffer_->Append(body);
 }
 
-void HttpResponse::AddBodyFile(const std::string &path) {
-  std::string res_path = root_path_ + path;
+void HttpResponse::MakeResponse(const std::string &path) {
+  path_ = path;
   // 1.请求资源文件检查
-  if(stat(res_path.data(), &file_stat_) < 0 || S_ISDIR(file_stat_.st_mode)) {
+  if(stat((root_path_ + path).data(), &file_stat_) < 0 || S_ISDIR(file_stat_.st_mode)) {
     code_ = 404;
   } else if(!(file_stat_.st_mode & S_IROTH)) {
     code_ = 403;
@@ -106,8 +106,8 @@ void HttpResponse::AddBodyFile(const std::string &path) {
   auto idx = path.find_last_of("/");
   if (idx != std::string::npos) {
     if (CodeToPath.find(code_) != CodeToPath.end()) {
-      res_path = root_path_ + CodeToPath.at(code_);
-      stat((res_path).c_str(), &file_stat_);
+      path_ = CodeToPath.at(code_);
+      stat((root_path_ + path_).data(), &file_stat_);
     }
   }
 
@@ -118,11 +118,11 @@ void HttpResponse::AddBodyFile(const std::string &path) {
   AddHeaders();
 
   // 5.添加文件类型
-  AddContentType(getFileType(res_path));
+  AddContentType(getFileType(path_));
 
   // 5.添加文件内容
-  LogInfo("add body: {}.", res_path);
-  int fd = open(res_path.c_str(), O_RDONLY);
+  LogInfo("add body: {}.", root_path_ + path_);
+  int fd = open((root_path_ + path_).c_str(), O_RDONLY);
   if (fd < 0) {
     AddErrorBody("File not found!");
     return;
