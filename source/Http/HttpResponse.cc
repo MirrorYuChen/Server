@@ -8,6 +8,7 @@
 #include "Base/Buffer.h"
 #include "Base/Logger.h"
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <unordered_map>
 
 NAMESPACE_BEGIN
@@ -48,12 +49,20 @@ const std::unordered_map<int, std::string> CodeToPath = {
   { 405, "/405.html" },
 };
 
-HttpResponse::HttpResponse(const std::string &root_path) : root_path_(root_path) {
+HttpResponse::HttpResponse() = default;
+HttpResponse::~HttpResponse() {
+  UnmapFile();
 }
 
-void HttpResponse::Init(bool is_keep_alive, int code) {
+void HttpResponse::Init(const std::string &root_path, const std::string &path, bool is_keep_alive, int code) {
   code_ = code;
   is_keep_alive_ = is_keep_alive;
+  if (mm_file) {
+    UnmapFile();
+  }
+  path_ = path;
+  root_path_ = root_path;
+  file_stat_ = { 0 };
 }
 
 void HttpResponse::AddStateLine(Buffer *buffer) {
@@ -90,6 +99,13 @@ void HttpResponse::MakeResponse(const std::string &body, const std::string &type
   buffer->Append(body);
 }
 
+void HttpResponse::UnmapFile() {
+  if (mm_file) {
+    munmap(mm_file, file_stat_.st_size);
+    mm_file = nullptr;
+  }
+}
+
 void HttpResponse::MakeResponse(Buffer *buffer) {
   // 1.请求资源文件检查
   if(stat((root_path_ + path_).data(), &file_stat_) < 0 || S_ISDIR(file_stat_.st_mode)) {
@@ -112,21 +128,21 @@ void HttpResponse::MakeResponse(Buffer *buffer) {
   // 5.添加文件类型
   AddContentType(getFileType(path_), buffer);
 
-  // 5.添加文件内容
+  // 6.添加文件内容
   LogInfo("add body: {}.", root_path_ + path_);
   int fd = open((root_path_ + path_).c_str(), O_RDONLY);
   if (fd < 0) {
     AddErrorBody("File not found!", buffer);
     return;
   }
-  buffer->Append("Content-Length: " + std::to_string(file_stat_.st_size) + "\r\n");
-  buffer->Append("\r\n");
-  int save_errno = 0;
-  int n = buffer->ReadFd(fd, &save_errno);
-  if (n < 0) {
-    AddErrorBody("Read file error!", buffer);
+  void *mm_ret = mmap(0, file_stat_.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (mm_ret == MAP_FAILED) {
+    AddErrorBody("File not found!", buffer);
+    return;
   }
+  mm_file = static_cast<char *>(mm_ret);
   close(fd);
+  buffer->Append("Content-Length: " + std::to_string(file_stat_.st_size) + "\r\n\r\n");
 }
 
 void HttpResponse::AddErrorHtml() {

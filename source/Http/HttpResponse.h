@@ -16,16 +16,20 @@ NAMESPACE_BEGIN
 class Buffer;
 class API HttpResponse {
 public:
-  HttpResponse(const std::string &root_path);
-  ~HttpResponse() = default;
+  HttpResponse();
+  ~HttpResponse();
 
-  void Init(bool is_keep_alive = false, int code = -1);
+  void Init(const std::string &root_path, const std::string &path, bool is_keep_alive = false, int code = -1);
   void MakeResponse(const std::string &str, const std::string &type, Buffer *buffer = nullptr);
   void MakeResponse(Buffer *buffer);
 
-  void setCode(int code) { code_ = code; }
-  void setPath(const std::string &path) { path_ = path; }
-  void setIsKeepAlive(bool is_keep_alive) { is_keep_alive_ = is_keep_alive; }
+  char *file() {
+    return mm_file;
+  }
+
+  size_t fileSize() const {
+    return file_stat_.st_size;
+  }
 
 private:
   void AddStateLine(Buffer *buffer);
@@ -36,11 +40,14 @@ private:
   void AddErrorBody(const std::string &err_msg, Buffer *buffer);
   void AddContentType(const std::string &type, Buffer *buffer);
 
+  void UnmapFile();
+
 private:
-  std::string root_path_;
-  std::string path_;
+  std::string root_path_ {};
+  std::string path_ {};
   int code_ {-1};
   bool is_keep_alive_ {false};
+  char *mm_file {nullptr};
   struct stat file_stat_{0};
 };
 

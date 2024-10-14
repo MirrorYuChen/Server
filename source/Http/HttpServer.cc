@@ -26,15 +26,15 @@ HttpServer::HttpServer(EventLoop *loop, const InetAddress &listen_addr,
 }
 
 void HttpServer::Start() {
-  LogStream(LInfo) << "HttpServer[" << server_.name() << "] starts listening on " << server_.ipPort();
+  LogInfo("HttpServer [{}] starts listening on {}.", server_.name(), server_.ipPort());
   server_.Start();
 }
 
 void HttpServer::onConnection(const TcpConnectionPtr &conn) {
   if (conn->connected()) {
-    LogStream(LInfo) << "new Connection arrived";
+    LogInfo("new Connection arrived");
   } else {
-    LogStream(LInfo) << "Connection closed";
+    LogInfo("Connection closed");
   }
 }
 void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf,
@@ -43,14 +43,14 @@ void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf,
   // 进行状态机解析
   // 错误则发送 BAD REQUEST 半关闭
   if (!context->ParseRequest(buf, recv_time)) {
-    LogStream(LInfo) << "ParseRequest failed!";
+    LogInfo("ParseRequest failed!");
     conn->Send("HTTP/1.1 400 Bad Request\r\n\r\n");
     conn->Shutdown();
   }
 
   // 如果成功解析
   if (context->gotAll()) {
-    LogStream(LInfo) << "ParseRequest success!";
+    LogInfo("ParseRequest success!");
     onRequest(conn, context->request());
     context->Reset();
   }
@@ -58,14 +58,13 @@ void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf,
 
 void HttpServer::onRequest(const TcpConnectionPtr &conn,
                            const HttpRequest &req) {
-  HttpResponse resp(root_path_);
-  resp.Init(req.IsKeepAlive());
+  HttpResponse resp;
+  resp.Init(root_path_, req.path(), req.IsKeepAlive());
   LogInfo("Path: {}.", req.path());
-  resp.setPath(req.path());
   Buffer buffer;
   resp.MakeResponse(&buffer);
+  buffer.Append(std::string(resp.file(), resp.fileSize()));
   std::string str = buffer.RetrieveAllAsString();
-  LogDebug("response: {}.", str);
   conn->Send(str);
   if (!req.IsKeepAlive()) {
     conn->Shutdown();
