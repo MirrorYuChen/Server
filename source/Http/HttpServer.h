@@ -22,6 +22,14 @@ public:
              const std::string &name, const std::string &root_path,
              TcpServer::Option option = TcpServer::kNoReusePort);
 
+  void InitDatabase(const std::string &url,
+    const std::string &user,
+    const std::string &passwd,
+    const std::string &dbname,
+    unsigned int port,
+    int max_conn
+  );
+
   EventLoop *getLoop() const { return server_.getLoop(); }
 
   void Start();

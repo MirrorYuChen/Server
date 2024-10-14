@@ -6,6 +6,7 @@
  */
 #include "Http/HttpServer.h"
 #include "Http/HttpContext.h"
+#include "Database/ConnectionPool.h"
 #include <memory>
 
 NAMESPACE_BEGIN
@@ -23,6 +24,16 @@ HttpServer::HttpServer(EventLoop *loop, const InetAddress &listen_addr,
     )
   );
   server_.setThreadNum(4);
+}
+
+void HttpServer::InitDatabase(const std::string &url,
+  const std::string &user,
+  const std::string &passwd,
+  const std::string &dbname,
+  unsigned int port,
+  int max_conn
+) {
+  ConnectionPool::getInstance()->Init(url, user, passwd, dbname, port, max_conn);
 }
 
 void HttpServer::Start() {

@@ -19,6 +19,7 @@ int main(int argc, char *argv[]) {
   setLogLevel(1);
   EventLoop loop;
   HttpServer server(&loop, InetAddress("0.0.0.0", 8080), "http-server", "../data/resources/html");
+  server.InitDatabase("localhost", "mirror", "cjy", "webdb", 3306, 8);
   server.Start();
   loop.Loop();
 }

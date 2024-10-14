@@ -70,6 +70,18 @@ const std::string HttpRequest::getHeader(const std::string &field) const {
   return "";
 }
 
+void HttpRequest::AddPost(const std::string &key, const std::string &value) {
+  posts_[key] = value;
+}
+
+const std::string HttpRequest::getPost(const std::string &field) const {
+  auto iter = posts_.find(field);
+  if (iter != posts_.end()) {
+    return iter->second;
+  }
+  return "";
+}
+
 void HttpRequest::Reset() {
   method_ = kInvalid;
   version_ = "Unknown";

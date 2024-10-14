@@ -45,6 +45,7 @@ private:
   bool ParseRequestLine(const std::string &line);
   void ParseHeaders(const std::string &line);
   void ParseBody(const std::string &line);
+  void ParsePosts();
   void ParsePath();
 
 private:

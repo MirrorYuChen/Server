@@ -99,10 +99,26 @@ public:
   /// @return 头信息的值
   const std::string getHeader(const std::string &field) const;
 
+  /// @brief 添加post请求信息
+  /// @param key 请求的键
+  /// @param value 请求的值
+  void AddPost(const std::string &key, const std::string &value);
+
+  /// @brief 获取post请求信息
+  /// @param field post请求的键
+  /// @return 对应值
+  const std::string getPost(const std::string &field) const;
+
   /// @brief 获取所有存储的头信息
   /// @return 所有存储的头信息
   const std::unordered_map<std::string, std::string> &headers() const {
     return headers_;
+  }
+
+  /// @brief 获取所有的posts
+  /// @return 所有存储的请求信息
+  const std::unordered_map<std::string, std::string> &posts() const {
+    return posts_;
   }
 
   void Reset();
@@ -117,6 +133,7 @@ private:
   std::string query_;
   Timestamp recv_time_;
   std::unordered_map<std::string, std::string> headers_;
+  std::unordered_map<std::string, std::string> posts_;
 };
 
 NAMESPACE_END
