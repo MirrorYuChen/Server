@@ -20,8 +20,9 @@ void DefaultHttpCallback(const HttpRequest &, HttpResponse *resp) {
 }
 
 HttpServer::HttpServer(EventLoop *loop, const InetAddress &listen_addr,
-                       const std::string &name, TcpServer::Option option)
-    : server_(loop, listen_addr, name, option),
+                       const std::string &name, const std::string &root_path, 
+                       TcpServer::Option option)
+    : server_(loop, listen_addr, name, option), root_path_(root_path),
       cb_(DefaultHttpCallback) {
   server_.setConnectionCallback(
     std::bind(&HttpServer::onConnection, this, std::placeholders::_1)
@@ -69,7 +70,7 @@ void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf,
 void HttpServer::onRequest(const TcpConnectionPtr &conn,
                            const HttpRequest &req) {
   const std::string &connection = req.getHeader("Connection");
-  HttpResponse resp;
+  HttpResponse resp(root_path_);
   resp.Init(req.IsKeepAlive());
   cb_(req, &resp);
   std::string str = resp.getOutputBuffer()->RetrieveAllAsString();

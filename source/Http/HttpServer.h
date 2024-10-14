@@ -19,7 +19,7 @@ class API HttpServer {
 public:
   using HttpCallback = std::function<void(const HttpRequest &, HttpResponse *)>;
   HttpServer(EventLoop *loop, const InetAddress &listen_addr,
-             const std::string &name,
+             const std::string &name, const std::string &root_path,
              TcpServer::Option option = TcpServer::kNoReusePort);
 
   EventLoop *getLoop() const { return server_.getLoop(); }
@@ -37,6 +37,7 @@ private:
 
 private:
   TcpServer server_;
+  const std::string root_path_;
   HttpCallback cb_;
 };
 

@@ -48,6 +48,9 @@ const std::unordered_map<int, std::string> CodeToPath = {
   { 405, "/405.html" },
 };
 
+HttpResponse::HttpResponse(const std::string &root_path) : root_path_(root_path) {
+}
+
 void HttpResponse::Init(bool is_keep_alive, int code) {
   code_ = code;
   is_keep_alive_ = is_keep_alive;
@@ -89,7 +92,7 @@ void HttpResponse::AddBodyString(const std::string &body, const std::string &typ
 }
 
 void HttpResponse::AddBodyFile(const std::string &path) {
-  std::string res_path = path;
+  std::string res_path = root_path_ + path;
   // 1.请求资源文件检查
   if(stat(res_path.data(), &file_stat_) < 0 || S_ISDIR(file_stat_.st_mode)) {
     code_ = 404;
@@ -100,11 +103,10 @@ void HttpResponse::AddBodyFile(const std::string &path) {
   }
 
   // 2.错误资源文件检查
-  auto idx = res_path.find_last_of("/");
+  auto idx = path.find_last_of("/");
   if (idx != std::string::npos) {
-    std::string sub_path = res_path.substr(0, idx);
     if (CodeToPath.find(code_) != CodeToPath.end()) {
-      res_path = sub_path + CodeToPath.at(code_);
+      res_path = root_path_ + CodeToPath.at(code_);
       stat((res_path).c_str(), &file_stat_);
     }
   }

@@ -26,7 +26,13 @@ void onRequest(const HttpRequest &req, HttpResponse *resp) {
       "text/html"
     );
   } else if (req.path() == "/index") {
-    resp->AddBodyFile("../data/resources/index.html");
+    resp->AddBodyFile("/index.html");
+  } else if (req.path() == "/login") {
+    resp->AddBodyFile("/login.html");
+  } else if (req.path() == "/image") {
+    resp->AddBodyFile("/image.html");
+  } else if (req.path() == "/video") {
+    resp->AddBodyFile("/video.html");
   } else if (req.path() == "/hello") {
     resp->AddBodyString("hello, world!\n", "text/plain");
   } else {
@@ -40,7 +46,7 @@ int main(int argc, char *argv[]) {
   setLogPath("./log.txt");
   setLogLevel(1);
   EventLoop loop;
-  HttpServer server(&loop, InetAddress("0.0.0.0", 8080), "http-server");
+  HttpServer server(&loop, InetAddress("0.0.0.0", 8080), "http-server", "../data/resources/html");
   server.setHttpCallback(onRequest);
   server.Start();
   loop.Loop();

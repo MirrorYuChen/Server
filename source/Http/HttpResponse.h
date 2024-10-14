@@ -16,7 +16,7 @@ NAMESPACE_BEGIN
 class Buffer;
 class API HttpResponse {
 public:
-  HttpResponse() = default;
+  HttpResponse(const std::string &root_path);
   ~HttpResponse() = default;
 
   void Init(bool is_keep_alive = false, int code = -1);
@@ -38,6 +38,7 @@ private:
   void AddContentType(const std::string &type);
 
 private:
+  std::string root_path_;
   int code_ {-1};
   bool is_keep_alive_ {false};
   struct stat file_stat_{0};
