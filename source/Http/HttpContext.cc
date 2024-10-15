@@ -15,7 +15,8 @@
 NAMESPACE_BEGIN
 const std::unordered_set<std::string> DefaultHtml {
   "/index", "/register", "/login",
-  "/welcome", "/video", "/image", "/fans"
+  "/welcome", "/video", "/image", 
+  "/fans"
 };
 
 const std::unordered_map<std::string, int> DefaultHtmlTag {
@@ -39,6 +40,11 @@ static bool Verify(const std::string &username, const std::string &passward, boo
     }
     return true;
   } else {
+    std::string sql_query = "SELECT username, passwd FROM user WHERE username='" + username + "' LIMIT 1";
+    auto result = raii.Query(sql_query);
+    if (result) {
+      return false;
+    }
     // 2.注册用户
     std::string sql_insert = "INSERT INTO user (username, passwd) VALUES ('" + username + "', '" + passward + "')";
     return raii.Execute(sql_insert);
@@ -146,7 +152,11 @@ void HttpContext::ParsePosts() {
     if (Verify(username, password, is_login)) {
       req_.setPath("/welcome.html");
     } else {
-      req_.setPath("/405.html");
+      if (is_login) {
+        req_.setPath("/login.html");
+      } else {
+        req_.setPath("/register.html");
+      }
     }
   }
 }
