@@ -24,15 +24,14 @@ const std::unordered_map<HttpRequest::Method, std::string> MethodToString = {
   {HttpRequest::kDelete, "DELETE"}
 };
 
-HttpRequest::HttpRequest() : method_(kInvalid), version_(kUnknown) {
+HttpRequest::HttpRequest() : method_(kInvalid), version_("Unknown") {
 
 }
 
 HttpRequest::~HttpRequest() = default;
 
-bool HttpRequest::setMethod(const char *start, const char *end) {
-  std::string key(start, end);
-  auto iter = StringToMethod.find(key);
+bool HttpRequest::setMethod(const std::string &method_str) {
+  auto iter = StringToMethod.find(method_str);
   if (iter != StringToMethod.end()) {
     method_ = iter->second;
     return true;
@@ -51,29 +50,16 @@ const char *HttpRequest::methodString() const {
   }
 }
 
-void HttpRequest::setPath(const char *start, const char *end) {
-  path_.clear();
-  path_.assign(start, end);
+void HttpRequest::setPath(const std::string &path) {
+  path_ = path;
 }
 
-void HttpRequest::setQuery(const char *start, const char *end) {
-  query_.clear();
-  query_.assign(start, end);
+void HttpRequest::setQuery(const std::string &query) {
+  query_ = query;
 }
 
-void HttpRequest::AddHeader(const char *start, const char *colon, const char *end) {
-  std::string field(start, colon);
-  ++colon;
-  // 1.从前往后跳过空格
-  while (colon < end && isspace(*colon)) {
-    ++colon;
-  }
-  std::string value(colon, end);
-  // 2.从后往前跳过空格
-  while (!value.empty() && isspace(value[value.size() - 1])) {
-    value.resize(value.size() - 1);
-  }
-  headers_[field] = value;
+void HttpRequest::AddHeader(const std::string &key, const std::string &value) {
+  headers_[key] = value;
 }
 
 const std::string HttpRequest::getHeader(const std::string &field) const {
@@ -84,13 +70,33 @@ const std::string HttpRequest::getHeader(const std::string &field) const {
   return "";
 }
 
-void HttpRequest::Swap(HttpRequest &other) {
-  std::swap(method_, other.method_);
-  std::swap(version_, other.version_);
-  path_.swap(other.path_);
-  query_.swap(other.query_);
-  std::swap(recv_time_, other.recv_time_);
-  headers_.swap(other.headers_);
+void HttpRequest::AddPost(const std::string &key, const std::string &value) {
+  posts_[key] = value;
+}
+
+const std::string HttpRequest::getPost(const std::string &field) const {
+  auto iter = posts_.find(field);
+  if (iter != posts_.end()) {
+    return iter->second;
+  }
+  return "";
+}
+
+void HttpRequest::Reset() {
+  method_ = kInvalid;
+  version_ = "Unknown";
+  path_.clear();
+  body_.clear();
+  query_.clear();
+  recv_time_ = Timestamp::invalid();
+  headers_.clear();
+}
+
+const bool HttpRequest::IsKeepAlive() const {
+  if (getHeader("Connection") == "keep-alive" && version() == "1.1") {
+    return true;
+  }
+  return false;
 }
 
 NAMESPACE_END

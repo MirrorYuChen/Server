@@ -53,12 +53,13 @@ public:
 
   ssize_t ReadFd(int fd, int *save_errno);
   ssize_t WriteFd(int fd, int *save_errno);
+  
+  char *beginWrite();
+  const char *beginWrite() const;
 
 private:
   char *begin();
   const char *begin() const;
-  char *beginWrite();
-  const char *beginWrite() const;
 
   void MakeSpace(int len);
 

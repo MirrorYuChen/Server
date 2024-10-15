@@ -22,24 +22,18 @@ public:
     kDelete = 4,
   };
 
-  enum Version {
-    kUnknown,
-    kHttp10,
-    kHttp11,
-  };
-
   HttpRequest();
   ~HttpRequest();
 
   /// @brief 设置版本
   /// @param version 版本
-  void setVersion(Version version) {
+  void setVersion(const std::string &version) {
     version_ = version;
   }
 
   /// @brief 获取版本
   /// @return 版本
-  const Version version() const {
+  const std::string &version() const {
     return version_;
   }
 
@@ -47,7 +41,7 @@ public:
   /// @param start 请求方法字符串起始位置
   /// @param end 请求方法字符串终止位置
   /// @return 是否设置成功
-  bool setMethod(const char *start, const char *end);
+  bool setMethod(const std::string &method);
 
   /// @brief 获取请求方法
   /// @return 请求方法
@@ -60,9 +54,7 @@ public:
   const char *methodString() const;
 
   /// @brief 设置路径
-  /// @param start 路径对应字符串起始位置
-  /// @param end 路径对应字符串终止位置
-  void setPath(const char *start, const char *end);
+  void setPath(const std::string &path);
 
   /// @brief 获取路径
   /// @return 路径
@@ -70,10 +62,16 @@ public:
     return path_;
   }
 
+  void setBody(const std::string &body) {
+    body_ = body;
+  }
+
+  const std::string &body() const {
+    return body_;
+  }
+
   /// @brief 设置请求
-  /// @param start 请求字符串对应起始位置
-  /// @param end 请求字符串对应终止位置
-  void setQuery(const char *start, const char *end);
+  void setQuery(const std::string &query);
 
   /// @brief 获取请求字符串
   /// @return 请求字符串
@@ -94,15 +92,22 @@ public:
   }
 
   /// @brief 添加请求头信息
-  /// @param start 请求头字符串起始位置
-  /// @param colon 请求头字符串冒号位置
-  /// @param end 请求头字符串终止位置
-  void AddHeader(const char *start, const char *colon, const char *end);
+  void AddHeader(const std::string &key, const std::string &value);
   
   /// @brief 获取头信息
   /// @param field 头信息的键
   /// @return 头信息的值
   const std::string getHeader(const std::string &field) const;
+
+  /// @brief 添加post请求信息
+  /// @param key 请求的键
+  /// @param value 请求的值
+  void AddPost(const std::string &key, const std::string &value);
+
+  /// @brief 获取post请求信息
+  /// @param field post请求的键
+  /// @return 对应值
+  const std::string getPost(const std::string &field) const;
 
   /// @brief 获取所有存储的头信息
   /// @return 所有存储的头信息
@@ -110,15 +115,25 @@ public:
     return headers_;
   }
 
-  void Swap(HttpRequest &other);
+  /// @brief 获取所有的posts
+  /// @return 所有存储的请求信息
+  const std::unordered_map<std::string, std::string> &posts() const {
+    return posts_;
+  }
+
+  void Reset();
+
+  const bool IsKeepAlive() const;
 
 private:
   Method method_;
-  Version version_;
+  std::string version_;
   std::string path_;
+  std::string body_;
   std::string query_;
   Timestamp recv_time_;
   std::unordered_map<std::string, std::string> headers_;
+  std::unordered_map<std::string, std::string> posts_;
 };
 
 NAMESPACE_END

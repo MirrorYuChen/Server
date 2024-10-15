@@ -19,12 +19,18 @@ class API HttpServer {
 public:
   using HttpCallback = std::function<void(const HttpRequest &, HttpResponse *)>;
   HttpServer(EventLoop *loop, const InetAddress &listen_addr,
-             const std::string &name,
+             const std::string &name, const std::string &root_path,
              TcpServer::Option option = TcpServer::kNoReusePort);
 
-  EventLoop *getLoop() const { return server_.getLoop(); }
+  void InitDatabase(const std::string &url,
+    const std::string &user,
+    const std::string &passwd,
+    const std::string &dbname,
+    unsigned int port,
+    int max_conn
+  );
 
-  void setHttpCallback(const HttpCallback &cb) { cb_ = cb; }
+  EventLoop *getLoop() const { return server_.getLoop(); }
 
   void Start();
 
@@ -37,7 +43,7 @@ private:
 
 private:
   TcpServer server_;
-  HttpCallback cb_;
+  const std::string root_path_;
 };
 
 NAMESPACE_END

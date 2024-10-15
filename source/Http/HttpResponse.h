@@ -8,60 +8,47 @@
 
 #include "Api.h"
 #include <string>
+#include <sys/stat.h>
 #include <unordered_map>
+#include <memory>
 
 NAMESPACE_BEGIN
 class Buffer;
 class API HttpResponse {
 public:
-  enum HttpStatusCode {
-    kUnknown,
-    kOK = 200,
-    kMovedPermanently = 301,
-    kBadRequest = 400,
-    kNotFound = 404,
-  };
-
-  explicit HttpResponse(bool close);
+  HttpResponse();
   ~HttpResponse();
 
-  void setStatusCode(HttpStatusCode code) {
-    status_code_ = code;
+  void Init(const std::string &root_path, const std::string &path, bool is_keep_alive = false, int code = -1);
+  void MakeResponse(const std::string &str, const std::string &type, Buffer *buffer = nullptr);
+  void MakeResponse(Buffer *buffer);
+
+  char *file() {
+    return mm_file;
   }
 
-  void setStatusMessage(const std::string &msg) {
-    status_msg_ = msg;
+  size_t fileSize() const {
+    return file_stat_.st_size;
   }
-
-  void setCloseConnection(bool on) {
-    close_connection_ = on;
-  }
-
-  const bool closeConnection() const {
-    return close_connection_;
-  }
-
-  void setContentType(const std::string &type) {
-    AddHeader("Content-Type", type);
-  }
-
-  void AddHeader(const std::string &key, const std::string &value) {
-    headers_[key] = value;
-  }
-
-  void setBody(const std::string &body) {
-    body_ = body;
-  }
-
-  void AppendToBuffer(Buffer *output) const;
 
 private:
-  std::unordered_map<std::string, std::string> headers_;
-  HttpStatusCode status_code_;
-  std::string status_msg_;
-  bool close_connection_;
-  std::string body_;
-};
+  void AddStateLine(Buffer *buffer);
+  void AddHeaders(Buffer *buffer);
 
+  void AddErrorHtml();
+  const std::string getFileType(const std::string &path) const;
+  void AddErrorBody(const std::string &err_msg, Buffer *buffer);
+  void AddContentType(const std::string &type, Buffer *buffer);
+
+  void UnmapFile();
+
+private:
+  std::string root_path_ {};
+  std::string path_ {};
+  int code_ {-1};
+  bool is_keep_alive_ {false};
+  char *mm_file {nullptr};
+  struct stat file_stat_{0};
+};
 
 NAMESPACE_END

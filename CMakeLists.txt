@@ -31,7 +31,7 @@ source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${SRC_FILES})
 
 set(OBJECTS_TO_LINK "")
 find_package(Threads REQUIRED)
-list(APPEND OBJECTS_TO_LINK Threads::Threads)
+list(APPEND OBJECTS_TO_LINK Threads::Threads mysqlclient)
 
 if (BUILD_SHARED_LIBS)
   add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
