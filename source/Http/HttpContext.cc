@@ -15,7 +15,7 @@
 NAMESPACE_BEGIN
 const std::unordered_set<std::string> DefaultHtml {
   "/index", "/register", "/login",
-  "/welcome", "/video", "/image",
+  "/welcome", "/video", "/image", "/fans"
 };
 
 const std::unordered_map<std::string, int> DefaultHtmlTag {
@@ -32,21 +32,15 @@ static bool Verify(const std::string &username, const std::string &passward, boo
   ConnectionPoolRAII raii(ConnectionPool::getInstance());
   if (is_login) {
     // 1.登录验证
-    std::string sql_query = "SELECT * FROM user WHERE username = '" + username + "' AND password = '" + passward + "'";
+    std::string sql_query = "SELECT username, passwd FROM user WHERE username='" + username + "' AND passwd='" + passward + "'";
     auto result = raii.Query(sql_query);
     if (!result) {
       return false;
     }
     return true;
   } else {
-    // 2.注册验证
-    std::string sql_query = "SELECT * FROM user WHERE username = '" + username + "' LIMITE 1";
-    auto result = raii.Query(sql_query);
-    if (result) {
-      return false;
-    }
-    // 3.注册用户
-    std::string sql_insert = "INSERT INTO user (username, password) VALUES ('" + username + "', '" + passward + "')";
+    // 2.注册用户
+    std::string sql_insert = "INSERT INTO user (username, passwd) VALUES ('" + username + "', '" + passward + "')";
     return raii.Execute(sql_insert);
   }
 }
