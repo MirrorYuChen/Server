@@ -36,7 +36,45 @@ hello
 hello
 ```
 ### 3.2 TinyWebServer案例
- - [1] 编译运行HttpServer
+ - [1] Win11的WSL安装MySQL：
+ ```bash
+# 系统环境：Win11的WSL
+# 1.安装mysql相关模块
+>> sudo apt-get install mysql-server -y
+>> sudo apt-get install libmysqlclient-dev -y
+ ```
+ - [2] 配置MySQL
+```bash
+# 1.进入mysql
+>> sudo mysql
+# 2.进入mysql数据库
+mysql> use mysql;
+# 3.修改root用户密码
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+# 4.修改远程访问
+mysql> UPDATE user SET `Host` = '%' WHERE `User` = 'root' LIMIT 1;
+mysql> flush privileges;
+mysql> exit;
+# 5.创建数据库
+mysql> create database webdb;
+# 6.给创建的数据库创建表
+mysql> use webdb;
+mysql> create table user(
+  username char(50) NULL,
+  passwd char(50) NULL
+) engine=InnoDB;
+# 7.创建用户
+mysql> create user 'mirror'@'localhost' identified by 'cjy';
+# 8.给用户mirror表访问权限
+mysql> grant all on webdb.user to 'mirror'@'localhost';
+# 9.刷新系统权限，即时生效
+mysql> flush privileges;
+```
+ - [3] 修改`test/TestHttpServer.cc`文件：
+```C++
+server.InitDatabase("localhost", "mirror", "cjy", "webdb", 3306, 8);
+```
+ - [4] 编译运行HttpServer
 ```bash
 >> mkdir build && cd build && ./TestHttpServer
 [2024-10-15 09:53:09.630] [chenjingyu] [info] [Acceptor.cc: 24] Acceptor create nonblocking socket [fd = 6]
@@ -55,7 +93,7 @@ hello
 [2024-10-15 09:53:09.640] [chenjingyu] [info] [EventLoop.cc: 68] EventLoop start looping.
 [2024-10-15 09:53:09.640] [chenjingyu] [info] [EventLoop.cc: 68] EventLoop start looping.
 ```
- - [2] 浏览器访问http://127.0.0.1:8080进行相关操作即可
+ - [5] 浏览器访问http://127.0.0.1:8080，进行相关操作即可
 
 
 ## 参考资料
