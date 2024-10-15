@@ -90,12 +90,14 @@ void HttpContext::ParseBody(const std::string &line) {
 }
 
 void HttpContext::ParsePosts() {
-  LogInfo("ParsePosts: method: {}, Content-Type: {}", req_.methodString(), req_.getHeader("Content-Type"));
   // 1.解析post相关信息
-  if (req_.methodString() != "POST" || req_.getHeader("Content-Type") != "application/x-www-form-urlencoded") {
+  if (std::string(req_.methodString()) != "POST" || req_.getHeader("Content-Type") != "application/x-www-form-urlencoded") {
+    LogDebug("No post data.");
+    LogDebug("method:{}, Content-Type:{}.", req_.methodString(), req_.getHeader("Content-Type"));
     return;
   }
   std::string body = req_.body();
+  LogInfo("body: {}", body);
   if (body.empty()) {
     return;
   }
