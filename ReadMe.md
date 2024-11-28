@@ -93,7 +93,7 @@ server.InitDatabase("localhost", "mirror", "cjy", "webdb", 3306, 8);
 [2024-10-15 09:53:09.640] [chenjingyu] [info] [EventLoop.cc: 68] EventLoop start looping.
 [2024-10-15 09:53:09.640] [chenjingyu] [info] [EventLoop.cc: 68] EventLoop start looping.
 ```
- - [5] 浏览器访问http://127.0.0.1:8080，进行相关操作即可
+ - [5] 浏览器访问[访问地址](http://127.0.0.1:8080)，进行相关操作即可
 
 
 ## 参考资料
